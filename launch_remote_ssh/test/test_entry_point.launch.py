@@ -10,6 +10,8 @@ from launch_catch_ros2 import Catch2LaunchDescription, Catch2IntegrationTestNode
 
 
 def generate_launch_description():
+    # TODO(nmorales) convert this into a script
+    
     # Manually get user and machine arguments
     user = ''
     machine = ''
