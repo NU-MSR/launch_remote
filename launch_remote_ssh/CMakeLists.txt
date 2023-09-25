@@ -40,6 +40,11 @@ install(DIRECTORY include/ DESTINATION include)
 # Launch utilities
 ament_python_install_package(launch_remote_ssh PACKAGE_DIR launch_remote_ssh)
 
+# Copy install space utility script
+install(PROGRAMS
+  scripts/copy_install_space.py
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 if(BUILD_TESTING)
   # TODO(anyone) lint testing
