@@ -64,18 +64,18 @@ if(BUILD_TESTING)
 
   # Node for testing remote launch capabilities
   install(PROGRAMS
-    test/param_tester.py
+    test/launch/param_tester.py
     DESTINATION lib/${PROJECT_NAME}
   )
   # Launch files for testing remote launch capabilities
   install(FILES
-    test/test_entry_point.launch.py
-    test/test_remotely_launched.launch.py
+    test/launch/test_entry_point.launch.py
+    test/launch/test_remotely_launched.launch.py
     DESTINATION share/${PROJECT_NAME}/launch
   )
   # catch_ros2 tester node
   add_executable(tester_node
-    test/tester_node.cpp
+    test/launch/tester_node.cpp
   )
   target_link_libraries(tester_node
     catch_ros2::catch_ros2_with_node_main
