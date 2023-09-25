@@ -2,16 +2,13 @@ from ament_index_python.packages import get_package_share_directory
 import sys
 import subprocess
 
-from launch import LaunchDescription
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.substitutions import LaunchConfiguration
 from launch.actions import SetLaunchConfiguration, DeclareLaunchArgument
-from launch_remote_ssh import LaunchRemote
+from launch_remote_ssh import LaunchRemote, copy_install_space
 from launch_catch_ros2 import Catch2LaunchDescription, Catch2IntegrationTestNode
 
 
 def generate_launch_description():
-    # TODO(nmorales) convert this into a script
-    
     # Manually get user and machine arguments
     user = ''
     machine = ''
@@ -22,24 +19,10 @@ def generate_launch_description():
         elif 'machine:=' in argv:
             machine = argv.replace('machine:=', '')
 
-    if user == '' or machine == '':
-        raise Exception("'user' and 'machine' arguments must be provided.")
-    
-    install_space = '/home/' + user + '/launch_remote_ssh_test/install/launch_remote_ssh/'
-    user_machine = user + '@' + machine
-    package_install = get_package_share_directory('launch_remote_ssh') + '/../../'
+    remote_install_space = '/home/' + user + '/launch_remote_ssh_test/install/launch_remote_ssh/'
 
-    # Create install space in home directory of user on machine
-    subprocess.run(
-        ['ssh ' + user_machine + ' "mkdir -p ' + install_space + '"'],
-        shell=True,
-    )
-
-    # Copy files to install space
-    subprocess.run(
-        ['rsync -r ' + package_install + ' ' + user_machine + ':' + install_space],
-        shell=True,
-    )
+    # Copy files to remote install space
+    copy_install_space(user, machine, 'launch_remote_ssh', remote_install_space)
 
     # Run launch test
     return Catch2LaunchDescription([
@@ -71,7 +54,7 @@ def generate_launch_description():
             package='launch_remote_ssh',
             launch_file='test_remotely_launched.launch.py',
             source_paths=[
-                install_space + 'share/launch_remote_ssh/local_setup.bash',
+                remote_install_space + 'share/launch_remote_ssh/local_setup.bash',
             ],
             launch_arguments=[
                 ('param1', LaunchConfiguration('param1')),
