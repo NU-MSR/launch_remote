@@ -17,8 +17,8 @@
 class LaunchManager : public rclcpp::Node
 {
 public:
-  LaunchManager(const std::string & machine, const std::string & user)
-  : Node("launch_manager", machine + "/" + user)
+  LaunchManager(const std::string & machine)
+  : Node("launch_manager", machine)
   {
   }
 };
@@ -73,12 +73,11 @@ std::tuple<std::string, std::string> get_machine_and_user()
 int main(int argc, char ** argv)
 {
   // Get machine and user names for namespacing
-  // TODO(nmorales) consider removing username
   const auto [machine, user] = get_machine_and_user();
 
   rclcpp::init(argc, argv);
   // TODO(nmorales) consider multithreaded executor. Probably not desired though
-  rclcpp::spin(std::make_shared<LaunchManager>(machine, user));
+  rclcpp::spin(std::make_shared<LaunchManager>(machine));
   rclcpp::shutdown();
 
   return 0;
