@@ -1,3 +1,4 @@
+# TODO(ngmor) document
 string package
 string name
 LaunchArgument[] arguments

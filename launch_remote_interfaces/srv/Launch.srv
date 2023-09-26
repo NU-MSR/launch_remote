@@ -1,3 +1,5 @@
+# TODO(ngmor) document
 LaunchFile file
 ---
+string command
 uint64 pid

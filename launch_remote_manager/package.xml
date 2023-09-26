@@ -7,8 +7,12 @@
   <maintainer email="ngmorales97@gmail.com">Nick Morales</maintainer>
   <license>TODO: License declaration</license>
 
+  <exec_depend>os</exec_depend>
   <exec_depend>platform</exec_depend>
+  <exec_depend>subprocess</exec_depend>
   <exec_depend>rclpy</exec_depend>
+  <exec_depend>ros2pkg</exec_depend>
+  <exec_depend>launch_remote_interfaces</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
