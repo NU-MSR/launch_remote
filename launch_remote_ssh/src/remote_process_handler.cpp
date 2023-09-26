@@ -2,18 +2,18 @@
 #include "rclcpp/rclcpp.hpp"
 
 // RAII node to terminate the indicated process
-class RemoteLaunchHandler : public rclcpp::Node
+class RemoteProcessHandler : public rclcpp::Node
 {
 public:
-  RemoteLaunchHandler()
-  : Node("remote_launch_handler"),
+  RemoteProcessHandler()
+  : Node("remote_process_handler"),
   // get screen PID to kill
   screen_pid_{declare_parameter<std::string>("screen_pid")},
   // construct kill command
   kill_command_{"screen -S " + screen_pid_ + " -X quit"}
   {
   }
-  ~RemoteLaunchHandler()
+  ~RemoteProcessHandler()
   {
     // execute kill command
     system(kill_command_.c_str());
@@ -35,7 +35,7 @@ int main(int argc, char * argv[])
   // Init ROS
   rclcpp::init(argc, argv);
 
-  auto node = std::make_shared<RemoteLaunchHandler>();
+  auto node = std::make_shared<RemoteProcessHandler>();
 
   try
   {
