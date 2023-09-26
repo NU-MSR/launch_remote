@@ -3,6 +3,7 @@ import rclpy
 from rclpy.node import Node
 from rcl_interfaces.msg import ParameterDescriptor
 from launch_remote_interfaces.msg import LaunchArgument as LaunchArgumentMsg
+from launch_remote_interfaces.srv import Launch as LaunchSrv
 
 def get_required_parameter_value(node, name):
     if node.has_parameter(name):
@@ -34,6 +35,7 @@ def entry(args=None):
     
     arguments = []
 
+    # Get all provided launch arguments
     i = 0
     while(True):
         param_name = f'argname{i}'
@@ -59,7 +61,38 @@ def entry(args=None):
             break
         i += 1
 
-    print(arguments)
+    # Service Clients
+    cli_launch_srv = \
+        launch_client_node.create_client(LaunchSrv, launch_client_node.get_namespace() + '/launch')
+
+    # Construct launch file service request from input parameters
+    launch_request = LaunchSrv.Request()
+    launch_request.file.package = package
+    launch_request.file.file = file
+    launch_request.file.arguments = arguments
+    launch_request.file.install_dirs = install_dirs
+
+    # Wait for service to exist
+    while rclpy.ok() and not cli_launch_srv.wait_for_service(1):
+        rclpy.spin(launch_client_node)
+
+    if not rclpy.ok():
+        rclpy.shutdown()
+        return
+    
+    # Call service
+    launch_response = cli_launch_srv.call(launch_request)
+
+    if not rclpy.ok():
+        rclpy.shutdown()
+        return
+    
+    try:
+        rclpy.spin(launch_client_node)
+    except KeyboardInterrupt:
+        pass
+
+    # TODO(ngmor) kill process
 
 if __name__ == '__main__':
     entry()
