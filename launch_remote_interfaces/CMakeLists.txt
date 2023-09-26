@@ -18,6 +18,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/LaunchFile.msg"
   "msg/LaunchArgument.msg"
   "srv/Launch.srv"
+  "srv/Stop.srv"
 )
 
 
