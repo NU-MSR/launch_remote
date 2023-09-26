@@ -50,11 +50,12 @@ class LaunchFile:
         else:
             self._source_cmd = ''
 
-            first = False
+            first = True
 
             for install_dir in self._msg.install_dirs:
                 if not first:
                     self._source_cmd += ' && '
+                    first = False
 
                 self._source_cmd += SOURCE_CMD.replace('${install_dir}', install_dir)
 
@@ -69,7 +70,7 @@ class LaunchFile:
             )
 
         for arg in self._msg.arguments:
-            self._launch_cmd += ' ' + arg.name + ':=' + arg.value
+            self._launch_cmd += ' ' + arg.name + ':=' + arg.value.replace(' ', '\\ ')
 
         # Full command
         self._cmd = self._source_cmd + ' && ' + self._launch_cmd
