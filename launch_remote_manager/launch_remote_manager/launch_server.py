@@ -65,7 +65,7 @@ class LaunchFile:
                 self._msg.package
             ).replace(
                 '${launch_file}',
-                self._msg.name
+                self._msg.file
             )
 
         for arg in self._msg.arguments:

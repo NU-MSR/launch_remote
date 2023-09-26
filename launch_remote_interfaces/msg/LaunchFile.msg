@@ -1,5 +1,5 @@
 # TODO(ngmor) document
 string package
-string name
+string file
 LaunchArgument[] arguments
 string[] install_dirs
