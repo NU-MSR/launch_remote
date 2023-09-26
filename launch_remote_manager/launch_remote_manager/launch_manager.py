@@ -3,6 +3,21 @@
 import rclpy
 from platform import node as get_host_name
 from rclpy.node import Node
+from launch_remote_interfaces.msg import LaunchFile as LaunchFileMsg
+
+class LaunchFile:
+    def __init__(self, msg : LaunchFileMsg):
+        self._msg = msg
+        self._compose_cmd()
+
+    def _compose_cmd(self):
+        self._cmd = 'ros2 launch ' + self._msg.package + ' ' + self._msg.name
+
+        for arg in self._msg.arguments:
+            self._cmd += ' ' + arg.name + ':=' + arg.value
+
+        # TODO(nmorales) remove
+        print(self._cmd)
 
 class LaunchManager(Node):
     def __init__(self):
