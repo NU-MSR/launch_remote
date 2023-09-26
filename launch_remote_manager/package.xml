@@ -4,7 +4,7 @@
   <name>launch_remote_manager</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="ngmorales97@gmail.com">ngm</maintainer>
+  <maintainer email="ngmorales97@gmail.com">Nick Morales</maintainer>
   <license>TODO: License declaration</license>
 
   <exec_depend>platform</exec_depend>
