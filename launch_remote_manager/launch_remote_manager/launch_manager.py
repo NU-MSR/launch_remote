@@ -154,7 +154,6 @@ class LaunchFile:
         # Escalates if process survives different termination signals
         if not parent_stopped:
             if self._parent_stop_times.interrupt is None:
-                print("interrupt")
                 self._popen.send_signal(SIGINT)
                 self._parent_stop_times.interrupt = time.time()
                 return False
@@ -163,7 +162,6 @@ class LaunchFile:
                 if (time.time() - self._parent_stop_times.interrupt) < INTERRUPT_TIMEOUT:
                     return False
                 else:
-                    print("terminate")
                     self._popen.terminate()
                     self._parent_stop_times.terminate = time.time()
                     return False
@@ -171,7 +169,6 @@ class LaunchFile:
             if (time.time() - self._parent_stop_times.terminate) < TERMINATE_TIMEOUT:
                 return False
             else:
-                print("kill")
                 self._popen.kill()
                 return False
 
@@ -200,7 +197,14 @@ class LaunchManager(Node):
 
         self._launch_files = {}
 
-    # TODO(ngmor) stop all on destruction
+    def __del__(self):
+        all_stopped = False
+
+        while not all_stopped:
+            all_stopped = True
+            for pid, launch_file in self._launch_files.items():
+                if not launch_file.stop():
+                    all_stopped = False
 
     def _srv_launch_callback(self, request : LaunchSrv.Request, response : LaunchSrv.Response):
         # TODO(ngmor) validate input fields
@@ -293,12 +297,16 @@ def entry(args=None):
         SHELL_EXECUTABLE = '/bin/bash'
         SIGINT = signal.SIGINT
 
-    # TODO(ngmor) consider try/catch
-    # TODO(ngmor) explicitly stop all processes on exit
     rclpy.init(args=args)
     launch_manager_node = LaunchManager()
-    rclpy.spin(launch_manager_node)
-    rclpy.shutdown()
+    try:
+        rclpy.spin(launch_manager_node)
+        rclpy.shutdown()
+    except KeyboardInterrupt:
+        pass
+
+    # Explicit stop all processes by destructing the node
+    del launch_manager_node
 
 if __name__ == '__main__':
     entry()
