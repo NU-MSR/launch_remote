@@ -1,4 +1,4 @@
 string package
 string name
 LaunchArgument[] arguments
-string[] source_paths
+string[] install_dirs
