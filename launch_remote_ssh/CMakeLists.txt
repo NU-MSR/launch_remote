@@ -13,7 +13,7 @@ find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 
 ###########
-## Build ##
+## BUILD ##
 ###########
 
 # Remote process handler
@@ -25,7 +25,7 @@ ament_target_dependencies(remote_process_handler
 )
 
 #############
-## Install ##
+## INSTALL ##
 #############
 
 # Remote process handler
