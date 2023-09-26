@@ -19,7 +19,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'launch_manager = launch_remote_manager.launch_manager:entry'
+            'launch_server = launch_remote_manager.launch_server:entry'
         ],
     },
 )

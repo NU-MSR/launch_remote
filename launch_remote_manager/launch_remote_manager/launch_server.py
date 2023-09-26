@@ -176,7 +176,7 @@ class LaunchFile:
 
 class LaunchManager(Node):
     def __init__(self):
-        super().__init__("launch_manager", namespace=get_host_name())
+        super().__init__("launch_server", namespace=get_host_name())
 
         # Timers
         self._tmr_check_processes = self.create_timer(1.0, self._tmr_check_processes_callback)
@@ -228,12 +228,10 @@ class LaunchManager(Node):
             # Store launch file
             self._launch_files[launch_file.pid()] = launch_file
 
-            # TODO (ngmor) publishing
-
         return response
     
     def _srv_stop_callback(self, request : StopSrv.Request, response : StopSrv.Response):
-        # TODO (ngmor)
+        # TODO(ngmor)
         if request.pid not in self._launch_files.keys():
             response.result = StopSrv.Response.NOT_FOUND
             return response
@@ -298,15 +296,15 @@ def entry(args=None):
         SIGINT = signal.SIGINT
 
     rclpy.init(args=args)
-    launch_manager_node = LaunchManager()
+    launch_server_node = LaunchManager()
     try:
-        rclpy.spin(launch_manager_node)
+        rclpy.spin(launch_server_node)
         rclpy.shutdown()
     except KeyboardInterrupt:
         pass
 
     # Explicit stop all processes by destructing the node
-    del launch_manager_node
+    del launch_server_node
 
 if __name__ == '__main__':
     entry()
