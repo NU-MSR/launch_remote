@@ -81,12 +81,16 @@ def entry(args=None):
         return
     
     # Call service
-    launch_response = cli_launch_srv.call(launch_request)
+    launch_future = cli_launch_srv.call_async(launch_request)
+
+    rclpy.spin_until_future_complete(launch_client_node, launch_future)
 
     if not rclpy.ok():
         rclpy.shutdown()
         return
-    
+
+    launch_response = launch_future.result()
+
     try:
         rclpy.spin(launch_client_node)
     except KeyboardInterrupt:
