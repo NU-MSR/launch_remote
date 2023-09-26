@@ -9,8 +9,11 @@ from psutil import Process
 
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 from ros2pkg.api import get_prefix_path
 from launch_remote_interfaces.msg import LaunchFile as LaunchFileMsg
+from launch_remote_interfaces.msg import LaunchProcess as LaunchProcessMsg
+from launch_remote_interfaces.msg import LaunchProcesses as LaunchProcessesMsg
 from launch_remote_interfaces.srv import Launch as LaunchSrv
 from launch_remote_interfaces.srv import Stop as StopSrv
 
@@ -71,6 +74,9 @@ class LaunchFile:
         # Full command
         self._cmd = self._source_cmd + ' && ' + self._launch_cmd
 
+    def msg(self):
+        return self._msg
+
     def cmd(self):
         return self._cmd
     
@@ -84,6 +90,14 @@ class LaunchFile:
             return None
         else:
             return self._popen.pid
+
+    def is_active(self):
+        if self._popen is None:
+            return False
+        elif self._popen.poll() is None:
+            return True
+        else:
+            return False
 
     def stop(self):
         if self._children is None:
@@ -167,11 +181,26 @@ class LaunchManager(Node):
     def __init__(self):
         super().__init__("launch_manager", namespace=get_host_name())
 
+        # Timers
+        self._tmr_check_processes = self.create_timer(1.0, self._tmr_check_processes_callback)
+
+        # Publishers
+        self._pub_active_launch_processes = self.create_publisher(
+            LaunchProcessesMsg,
+            'active_launch_processes',
+            QoSProfile(
+                reliability=QoSReliabilityPolicy.SYSTEM_DEFAULT,
+                history=QoSHistoryPolicy.SYSTEM_DEFAULT,
+            ),
+        )
+
         # Service Servers
         self._srv_launch = self.create_service(LaunchSrv, 'launch', self._srv_launch_callback)
         self._srv_stop = self.create_service(StopSrv, 'stop', self._srv_stop_callback)
 
         self._launch_files = {}
+
+    # TODO(ngmor) stop all on destruction
 
     def _srv_launch_callback(self, request : LaunchSrv.Request, response : LaunchSrv.Response):
         # TODO(ngmor) validate input fields
@@ -219,6 +248,34 @@ class LaunchManager(Node):
         response.result = StopSrv.Response.SUCCESS
 
         return response
+
+    def _tmr_check_processes_callback(self):
+        msg = LaunchProcessesMsg()
+        pids_to_remove = []
+
+        for pid, launch_file in self._launch_files.items():
+            if launch_file.is_active():
+                # Include launch file process in the output message
+                process_msg = LaunchProcessMsg()
+                process_msg.pid = pid
+                process_msg.file = launch_file.msg()
+                msg.processes.append(process_msg)
+
+            else:
+                # stop processes and remove
+                while not launch_file.stop():
+                    # TODO(ngmor) timeout?
+                    pass
+
+                pids_to_remove.append(pid)
+
+        # Remove stopped processes
+        for pid in pids_to_remove:
+            self._launch_files.pop(pid)
+
+        # Publish active processes
+        self._pub_active_launch_processes.publish(msg)
+
 
 def entry(args=None):
     """Spin the node."""

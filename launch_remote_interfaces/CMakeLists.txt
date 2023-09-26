@@ -17,6 +17,8 @@ find_package(rosidl_default_generators REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/LaunchFile.msg"
   "msg/LaunchArgument.msg"
+  "msg/LaunchProcess.msg"
+  "msg/LaunchProcesses.msg"
   "srv/Launch.srv"
   "srv/Stop.srv"
 )
