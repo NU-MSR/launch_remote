@@ -11,7 +11,6 @@ def generate_launch_description():
     machine = 'galagongm'
     package = 'launch_remote_ssh'
     launch_file = 'test_remotely_launched.launch.py'
-    # install_dirs = [''] # TODO(ngmor) must pass this in if empty
     install_dirs = ['/home/ngm/classes/final/remote_ws/install']
     launch_arguments=[
         ('param1', '-0.567'),

@@ -27,7 +27,7 @@ class LaunchRemote(Node):
         self.__package = package
         self.__launch_file = launch_file
         self.__uuid = uuid4()
-        if install_dirs is None: # TODO(ngmor) test this
+        if (install_dirs is None) or (len(install_dirs) == 0):
             self.__install_dirs = ['']
         else:
             self.__install_dirs = install_dirs
