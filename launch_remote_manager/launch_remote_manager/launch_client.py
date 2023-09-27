@@ -4,6 +4,7 @@ import signal
 
 import rclpy
 from rclpy.node import Node
+from rclpy.parameter import Parameter
 from launch_remote_interfaces.msg import LaunchArgument as LaunchArgumentMsg
 from launch_remote_interfaces.srv import Launch as LaunchSrv
 from launch_remote_interfaces.srv import Stop as StopSrv
@@ -34,8 +35,20 @@ def entry(args=None):
     # Parameters
     package = get_required_parameter_value(launch_client_node, 'package').string_value
     file = get_required_parameter_value(launch_client_node, 'file').string_value
-    install_dirs = \
-        get_required_parameter_value(launch_client_node, 'install_dirs').string_array_value
+    install_dirs_param_val = \
+        get_required_parameter_value(launch_client_node, 'install_dirs')
+    
+    install_dirs_param = launch_client_node.get_parameter('install_dirs')
+
+    if install_dirs_param.type_ == Parameter.Type.STRING:
+        install_dirs = [install_dirs_param.get_parameter_value().string_value]
+    elif install_dirs_param.type_ == Parameter.Type.STRING_ARRAY:
+        install_dirs = install_dirs_param.get_parameter_value().string_array_value
+    else:
+        raise \
+            Exception(f'Unexpected type for install_dirs parameter: {install_dirs_param_val.type}')
+    
+    
     if '' in install_dirs:
         install_dirs.pop(install_dirs.index(''))
     
