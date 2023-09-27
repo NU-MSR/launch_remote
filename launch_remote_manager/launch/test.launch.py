@@ -3,6 +3,7 @@
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, SetLaunchConfiguration
 from launch.substitutions import LaunchConfiguration
+from launch.conditions import IfCondition, UnlessCondition
 from launch_remote_manager import LaunchRemote
 
 def generate_launch_description():
@@ -12,7 +13,6 @@ def generate_launch_description():
     launch_file = 'test_remotely_launched.launch.py'
     # install_dirs = [''] # TODO(ngmor) must pass this in if empty
     install_dirs = ['/home/ngm/classes/final/remote_ws/install']
-    # TODO(ngmor) going to have to process these in the same way as LaunchRemote
     launch_arguments=[
         ('param1', '-0.567'),
         ('param2', 'this is a sentence!'),
@@ -20,14 +20,21 @@ def generate_launch_description():
     ]
 
     return LaunchDescription([
+        DeclareLaunchArgument(
+            name='use_raw_values',
+            default_value='true',
+            choices=['true','false'],
+        ),
         # Test with raw values
-        # LaunchRemote(
-        #     machine=machine,
-        #     package=package,
-        #     launch_file=launch_file,
-        #     launch_arguments=launch_arguments,
-        #     install_dirs=install_dirs,
-        # ),
+        LaunchRemote(
+            machine=machine,
+            package=package,
+            launch_file=launch_file,
+            launch_arguments=launch_arguments,
+            install_dirs=install_dirs,
+            condition=IfCondition(LaunchConfiguration('use_raw_values')),
+        ),
+
         # Test with launch configurations
         SetLaunchConfiguration(
             name='machine',
@@ -51,7 +58,7 @@ def generate_launch_description():
         ),
         SetLaunchConfiguration(
             name='argval0',
-            value=launch_arguments[0][1]
+            value='different sentence?'
         ),
         SetLaunchConfiguration(
             name='argname1',
@@ -59,7 +66,7 @@ def generate_launch_description():
         ),
         SetLaunchConfiguration(
             name='argval1',
-            value=launch_arguments[1][1]
+            value='-106'
         ),
         SetLaunchConfiguration(
             name='argname2',
@@ -67,7 +74,7 @@ def generate_launch_description():
         ),
         SetLaunchConfiguration(
             name='argval2',
-            value=launch_arguments[2][1]
+            value='-0.2341'
         ),
         LaunchRemote(
             machine=LaunchConfiguration('machine'),
@@ -79,5 +86,6 @@ def generate_launch_description():
                 (LaunchConfiguration('argname2'), LaunchConfiguration('argval2')),
             ],
             install_dirs=[LaunchConfiguration('install_dir')],
+            condition=UnlessCondition(LaunchConfiguration('use_raw_values')),
         ),
     ])
