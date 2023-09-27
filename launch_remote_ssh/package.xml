@@ -6,6 +6,8 @@
   <description>Tools for remotely launching launch files/nodes via an SSH connection.</description>
   <maintainer email="ngmorales97@gmail.com">Nick Morales</maintainer>
   <license>BSD-3-Clause</license>
+  <author email="ngmorales97@gmail.com">Nick Morales</author>
+  <author email="elwin@northwestern.edu">Matthew Elwin</author>
 
   <depend>rclcpp</depend>
   <depend>rclpy</depend>
