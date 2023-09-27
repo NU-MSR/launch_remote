@@ -6,6 +6,8 @@
   <description>Interfaces for remote launching</description>
   <maintainer email="ngmorales97@gmail.com">Nick Morales</maintainer>
   <license>BSD-3-Clause</license>
+  <author email="ngmorales97@gmail.com">Nick Morales</author>
+  <author email="elwin@northwestern.edu">Matthew Elwin</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

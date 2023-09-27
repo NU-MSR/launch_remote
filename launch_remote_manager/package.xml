@@ -6,6 +6,8 @@
   <description>Remote launch managing system.</description>
   <maintainer email="ngmorales97@gmail.com">Nick Morales</maintainer>
   <license>BSD-3-Clause</license>
+  <author email="ngmorales97@gmail.com">Nick Morales</author>
+  <author email="elwin@northwestern.edu">Matthew Elwin</author>
 
   <exec_depend>os</exec_depend>
   <exec_depend>platform</exec_depend>
