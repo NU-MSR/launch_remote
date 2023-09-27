@@ -47,18 +47,16 @@ def entry(args=None):
         param_name = f'argname{i}'
         param_val = f'argval{i}'
         if launch_client_node.has_parameter(param_name):
-            argname = \
-                launch_client_node.get_parameter(param_name).get_parameter_value().string_value
+            argname = str(launch_client_node.get_parameter(param_name).value)
 
             if not (launch_client_node.has_parameter(param_val)):
                 raise Exception(
                     'Mismatch in number of provided parameter name/value pairs:\n'
                     f'{param_name}: {argname} did not have a value provided as {param_val}'
                 )
-            
-            argval = \
-                launch_client_node.get_parameter(param_val).get_parameter_value().string_value
-            
+
+            argval = str(launch_client_node.get_parameter(param_val).value)
+
             msg = LaunchArgumentMsg()
             msg.name = argname
             msg.value = argval
