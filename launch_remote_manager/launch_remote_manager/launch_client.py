@@ -4,7 +4,6 @@ import signal
 
 import rclpy
 from rclpy.node import Node
-from rcl_interfaces.msg import ParameterDescriptor
 from launch_remote_interfaces.msg import LaunchArgument as LaunchArgumentMsg
 from launch_remote_interfaces.srv import Launch as LaunchSrv
 from launch_remote_interfaces.srv import Stop as StopSrv
@@ -14,8 +13,6 @@ def get_required_parameter_value(node, name):
         return node.get_parameter(name).get_parameter_value()
     else:
         raise Exception(f'Required parameter "{name}" not provided.')
-
-SHUTDOWN = False
 
 def signal_handler(sig, frame):
     print('SIGINT received, shutting down launched nodes')
