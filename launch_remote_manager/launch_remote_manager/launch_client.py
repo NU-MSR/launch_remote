@@ -1,15 +1,24 @@
 
+import os
+import signal
+
 import rclpy
 from rclpy.node import Node
 from rcl_interfaces.msg import ParameterDescriptor
 from launch_remote_interfaces.msg import LaunchArgument as LaunchArgumentMsg
 from launch_remote_interfaces.srv import Launch as LaunchSrv
+from launch_remote_interfaces.srv import Stop as StopSrv
 
 def get_required_parameter_value(node, name):
     if node.has_parameter(name):
         return node.get_parameter(name).get_parameter_value()
     else:
         raise Exception(f'Required parameter "{name}" not provided.')
+
+SHUTDOWN = False
+
+def signal_handler(sig, frame):
+    print('SIGINT received, shutting down launched nodes')
 
 def entry(args=None):
     rclpy.init(args=args)
@@ -64,6 +73,9 @@ def entry(args=None):
     # Service Clients
     cli_launch_srv = \
         launch_client_node.create_client(LaunchSrv, launch_client_node.get_namespace() + '/launch')
+    cli_stop_srv = \
+        launch_client_node.create_client(StopSrv, launch_client_node.get_namespace() + '/stop')
+
 
     # Construct launch file service request from input parameters
     launch_request = LaunchSrv.Request()
@@ -91,12 +103,40 @@ def entry(args=None):
 
     launch_response = launch_future.result()
 
-    try:
-        rclpy.spin(launch_client_node)
-    except KeyboardInterrupt:
-        pass
+    # TODO(ngmor) handle errors in this response
 
-    # TODO(ngmor) kill process
+    launch_client_node.get_logger().info(
+        f'Launched following command with PID {launch_response.pid}'
+        f' on {launch_client_node.get_namespace()}:\n' + launch_response.command
+    )
+
+    # Ignore SIGINTs
+    # TODO(anyone) this is untested on Windows
+    if os.name == 'nt':
+        signal.signal(signal.CTRL_C_EVENT, signal_handler)
+        # https://stackoverflow.com/questions/9784972/python-signal-pause-equivalent-on-windows
+        os.system('pause')
+    else:
+        signal.signal(signal.SIGINT, signal_handler)
+        signal.pause()
+
+    # Stop process now that this has been interrupted
+    stop_request = StopSrv.Request()
+    stop_request.pid = launch_response.pid
+
+    stop_future = cli_stop_srv.call_async(stop_request)
+
+    while not stop_future.done():
+        rclpy.spin_once(launch_client_node)
+
+    stop_response = stop_future.result()
+
+    if stop_response.result == StopSrv.Response.SUCCESS:
+        launch_client_node.get_logger().info('Launch file stopped successfully')
+    elif stop_response.result == StopSrv.Response.NOT_FOUND:
+        launch_client_node.get_logger().warn('Launch file process not found to stop')
+    else:
+        launch_client_node.get_logger().warn('Unrecognized return code')
 
 if __name__ == '__main__':
     entry()

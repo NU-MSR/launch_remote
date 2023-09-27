@@ -174,7 +174,7 @@ class LaunchFile:
                 return False
 
 
-
+# TODO(ngmor) add kill all service
 class LaunchManager(Node):
     def __init__(self):
         super().__init__("launch_server", namespace=get_host_name())
