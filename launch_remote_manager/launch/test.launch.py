@@ -1,9 +1,7 @@
-# TODO(ngmor) convert into launch action
-
-from uuid import uuid4
+# TODO(ngmor) remove
 
 from launch import LaunchDescription
-from launch_ros.actions import Node
+from launch_remote_manager import LaunchRemote
 
 def generate_launch_description():
     # Inputs
@@ -19,26 +17,12 @@ def generate_launch_description():
         ('param3', '453'),
     ]
 
-
-    # Logic
-    uuid = uuid4()
-
-    parameters = {}
-    parameters['package'] = package
-    parameters['file'] = file
-    parameters['install_dirs'] = install_dirs
-
-    for i, argument in enumerate(launch_arguments):
-        parameters[f'argname{i}'] = argument[0]
-        parameters[f'argval{i}'] = argument[1]
-
     return LaunchDescription([
-        Node(
-            package='launch_remote_manager',
-            executable='launch_client',
-            output='screen', # TODO(ngmor) allow this to be passed through
-            name='launch_client_' + f'{uuid.int:x}',
-            namespace='/' + machine,
-            parameters=[parameters]
+        LaunchRemote(
+            machine=machine,
+            package=package,
+            launch_file=file,
+            launch_arguments=launch_arguments,
+            install_dirs=install_dirs,
         )
     ])
