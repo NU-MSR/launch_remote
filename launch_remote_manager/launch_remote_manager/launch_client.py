@@ -83,7 +83,7 @@ def entry(args=None):
 
     # Wait for service to exist
     while rclpy.ok() and not cli_launch_srv.wait_for_service(1):
-        rclpy.spin(launch_client_node)
+        rclpy.spin_once(launch_client_node)
 
     if not rclpy.ok():
         rclpy.shutdown()
@@ -120,6 +120,9 @@ def entry(args=None):
     # Stop process now that this has been interrupted
     stop_request = StopSrv.Request()
     stop_request.pid = launch_response.pid
+
+    while not cli_stop_srv.wait_for_service(1):
+        rclpy.spin_once(launch_client_node)
 
     stop_future = cli_stop_srv.call_async(stop_request)
 
