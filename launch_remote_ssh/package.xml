@@ -3,15 +3,16 @@
 <package format="3">
   <name>launch_remote_ssh</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="ngmorales97@gmail.com">ngm</maintainer>
-  <license>TODO: License declaration</license>
+  <description>Tools for remotely launching launch files/nodes via an SSH connection.</description>
+  <maintainer email="ngmorales97@gmail.com">Nick Morales</maintainer>
+  <license>BSD-3-Clause</license>
 
   <depend>rclcpp</depend>
   <depend>rclpy</depend>
   <depend>catch_ros2</depend>
 
   <exec_depend>rsync</exec_depend>
+  <exec_depend>screen</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
