@@ -34,9 +34,6 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
-# Include directories
-install(DIRECTORY include/ DESTINATION include)
-
 # Launch utilities
 ament_python_install_package(launch_remote_ssh PACKAGE_DIR launch_remote_ssh)
 
