@@ -104,6 +104,9 @@ class LaunchFile:
         if self._children is None:
             if self._popen is None:
                 return True
+            
+            if self._popen.poll() is not None:
+                return True
 
             self._children = []
             for child in self._process.children(recursive=True):
