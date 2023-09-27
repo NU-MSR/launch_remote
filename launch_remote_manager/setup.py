@@ -22,6 +22,7 @@ setup(
         'console_scripts': [
             'launch_server = launch_remote_manager.launch_server:entry',
             'launch_client = launch_remote_manager.launch_client:entry',
+            'copy_install_space = launch_remote_manager.copy_install_space:entry',
         ],
     },
 )
