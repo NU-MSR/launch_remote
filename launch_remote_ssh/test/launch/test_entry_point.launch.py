@@ -32,7 +32,7 @@ import sys
 
 from launch.substitutions import LaunchConfiguration
 from launch.actions import SetLaunchConfiguration, DeclareLaunchArgument
-from launch_remote_ssh import LaunchRemote, copy_single_package_install
+from launch_remote_ssh import LaunchRemoteSSH, copy_single_package_install
 from launch_catch_ros2 import Catch2LaunchDescription, Catch2IntegrationTestNode
 
 
@@ -76,7 +76,7 @@ def generate_launch_description():
             name='param3',
             value='453',
         ),
-        LaunchRemote(
+        LaunchRemoteSSH(
             user=LaunchConfiguration('user'),
             machine=LaunchConfiguration('machine'),
             package='launch_remote_ssh',

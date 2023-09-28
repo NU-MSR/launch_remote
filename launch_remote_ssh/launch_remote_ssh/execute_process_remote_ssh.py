@@ -44,7 +44,7 @@ from .replace_text_substitution import ReplaceTextSubstitution
 
 # https://answers.ros.org/question/364152/remotely-launch-nodes-in-ros2/
 
-class ExecuteProcessRemote(LaunchDescription):
+class ExecuteProcessRemoteSSH(LaunchDescription):
     def __init__(
         self,
         user : SomeSubstitutionsType,
@@ -70,7 +70,7 @@ class ExecuteProcessRemote(LaunchDescription):
             port_list.append(self.__port)
 
         # Compile process name into list with UUID at the end
-        # TODO - this has a max of 80 characters. Can this be enforced still using
+        # TODO(anyone) - this has a max of 80 characters. Can this be enforced still using
         # substitutions?
         process_name_list = [
             self.__machine,

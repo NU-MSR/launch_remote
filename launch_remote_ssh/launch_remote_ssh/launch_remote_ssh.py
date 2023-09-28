@@ -36,12 +36,12 @@ from launch.some_substitutions_type import SomeSubstitutionsType
 from launch.condition import Condition
 
 from .replace_text_substitution import ReplaceTextSubstitution
-from .execute_process_remote import ExecuteProcessRemote
+from .execute_process_remote_ssh import ExecuteProcessRemoteSSH
 
 
 
 
-class LaunchRemote(ExecuteProcessRemote):
+class LaunchRemoteSSH(ExecuteProcessRemoteSSH):
     def __init__(
         self,
         user : SomeSubstitutionsType,

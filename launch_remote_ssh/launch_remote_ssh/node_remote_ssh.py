@@ -35,16 +35,16 @@ from launch.some_substitutions_type import SomeSubstitutionsType
 from launch.condition import Condition
 from launch.utilities import normalize_to_list_of_substitutions
 
-from .execute_process_remote import ExecuteProcessRemote
+from .execute_process_remote_ssh import ExecuteProcessRemoteSSH
 
-class NodeRemote(ExecuteProcessRemote):
+class NodeRemoteSSH(ExecuteProcessRemoteSSH):
     def __init__(
         self,
         user : SomeSubstitutionsType,
         machine : SomeSubstitutionsType,
         package : SomeSubstitutionsType,
         executable : SomeSubstitutionsType,
-        # TODO - arguments, parameters
+        # TODO(ngmor) - arguments, parameters
         port : SomeSubstitutionsType = None,
         source_paths : Optional[Iterable[SomeSubstitutionsType]] = None,
         condition : Optional[Condition] = None
