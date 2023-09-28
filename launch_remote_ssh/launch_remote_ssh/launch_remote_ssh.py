@@ -43,7 +43,7 @@ from .execute_process_remote_ssh import ExecuteProcessRemoteSSH
 
 class LaunchRemoteSSH(ExecuteProcessRemoteSSH):
     def __init__(
-        self,
+        self, *,
         user : SomeSubstitutionsType,
         machine : SomeSubstitutionsType,
         package : SomeSubstitutionsType,

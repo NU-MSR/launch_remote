@@ -47,7 +47,7 @@ from .replace_text_substitution import ReplaceTextSubstitution
 
 class ExecuteProcessRemoteSSH(LaunchDescription):
     def __init__(
-        self,
+        self, *,
         user : SomeSubstitutionsType,
         machine : SomeSubstitutionsType,
         command : Iterable[SomeSubstitutionsType],
