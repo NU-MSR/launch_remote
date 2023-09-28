@@ -30,6 +30,7 @@
 
 from typing import Optional
 from typing import Iterable
+from typing import Text
 
 from uuid import uuid4
 
@@ -69,21 +70,21 @@ class ExecuteProcessRemoteSSH(LaunchDescription):
             port_list.append(' -p ')
             port_list.append(self.__port)
 
-        # Compile process name into list with UUID at the end
+        # Compile process name into list with shortened UUID at the end
         # TODO(anyone) - this has a max of 80 characters. Can this be enforced still using
         # substitutions?
         process_name_list = [
             self.__machine,
             '_',
-            f'{self.__uuid.int:x}'
+            self.uuid_short
         ]
 
         # Replace any dots with underscores
         process_name_list = [
             ReplaceTextSubstitution(
                 normalize_to_list_of_substitutions(process_name_list),
-                ".",
-                "_",
+                '.',
+                '_',
             )
         ]
 
@@ -136,10 +137,21 @@ class ExecuteProcessRemoteSSH(LaunchDescription):
                 Node(
                     package='launch_remote_ssh',
                     executable='remote_process_handler',
-                    namespace=process_name_list,
+                    name='remote_process_handler_' + self.uuid_short,
+                    namespace=ReplaceTextSubstitution(self.__machine, '.', '_'),
                     output='screen',
                     parameters=[{'screen_pid': process_name_list}],
                     condition=self.__condition,
                 ),
             ]
         )
+
+    @property
+    def uuid_full(self) -> Text:
+        """Getter for full uuid."""
+        return f'{self.__uuid.int:x}'
+    
+    @property
+    def uuid_short(self) -> Text:
+        """Getter for short uuid."""
+        return f'{self.uuid_full:.12}'
