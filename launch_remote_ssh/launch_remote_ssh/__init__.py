@@ -32,7 +32,7 @@ from .replace_text_substitution import ReplaceTextSubstitution
 from .execute_process_remote_ssh import ExecuteProcessRemoteSSH
 from .node_remote_ssh import NodeRemoteSSH
 from .launch_remote_ssh import LaunchRemoteSSH
-from .copy_install import copy_single_package_install, copy_install_space
+from .install_remote_ssh import copy_single_package_install, copy_install_space
 
 __all__ = [
     'ReplaceTextSubstitution',

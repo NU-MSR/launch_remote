@@ -50,7 +50,7 @@ def generate_launch_description():
     remote_install_space = '/tmp/launch_remote_ssh_test/install'
 
     # Copy files to remote install space
-    copy_single_package_install(user, machine, 'launch_remote_ssh', remote_install_space)
+    copy_single_package_install(user, machine, 'launch_remote_ssh', remote_install_space, True)
 
     # Run launch test
     return Catch2LaunchDescription([
