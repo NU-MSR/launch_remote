@@ -45,7 +45,7 @@ class NodeRemoteSSH(ExecuteProcessRemoteSSH):
         package : SomeSubstitutionsType,
         executable : SomeSubstitutionsType,
         # TODO(ngmor) - arguments, parameters
-        port : SomeSubstitutionsType = None,
+        port : Optional[SomeSubstitutionsType] = None,
         source_paths : Optional[Iterable[SomeSubstitutionsType]] = None,
         condition : Optional[Condition] = None
     ):

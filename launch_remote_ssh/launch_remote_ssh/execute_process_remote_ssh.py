@@ -51,7 +51,7 @@ class ExecuteProcessRemoteSSH(LaunchDescription):
         user : SomeSubstitutionsType,
         machine : SomeSubstitutionsType,
         command : Iterable[SomeSubstitutionsType],
-        port : SomeSubstitutionsType = None,
+        port : Optional[SomeSubstitutionsType] = None,
         source_paths : Optional[Iterable[SomeSubstitutionsType]] = None,
         condition : Optional[Condition] = None
     ):

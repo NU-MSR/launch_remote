@@ -51,7 +51,7 @@ class LaunchRemoteSSH(ExecuteProcessRemoteSSH):
         launch_arguments: Optional[
             Iterable[Tuple[SomeSubstitutionsType, SomeSubstitutionsType]]
         ] = None,
-        port : SomeSubstitutionsType = None,
+        port : Optional[SomeSubstitutionsType] = None,
         source_paths : Optional[Iterable[SomeSubstitutionsType]] = None,
         condition : Optional[Condition] = None
     ):
