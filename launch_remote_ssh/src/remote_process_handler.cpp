@@ -37,10 +37,10 @@ class RemoteProcessHandler : public rclcpp::Node
 public:
   RemoteProcessHandler()
   : Node("remote_process_handler"),
-  // get screen PID to kill
-  screen_pid_{declare_parameter<std::string>("screen_pid")},
+  // get screen process name to kill
+  screen_process_name_{declare_parameter<std::string>("screen_process_name")},
   // construct kill command
-  kill_command_{"screen -S " + screen_pid_ + " -X quit"}
+  kill_command_{"screen -S " + screen_process_name_ + " -X quit"}
   {
   }
   ~RemoteProcessHandler()
@@ -49,13 +49,13 @@ public:
     system(kill_command_.c_str());
   }
 
-  const std::string screen_pid() const
+  const std::string screen_process_name() const
   {
-    return screen_pid_;
+    return screen_process_name_;
   }
   
 private:
-  const std::string screen_pid_ = "";
+  const std::string screen_process_name_ = "";
   const std::string kill_command_ = "";
 };
 
@@ -72,7 +72,7 @@ int main(int argc, char * argv[])
     while (rclcpp::ok()) {
       rclcpp::spin_some(node);
     }
-    RCLCPP_INFO_STREAM(node->get_logger(), "\nTERMINATING: " << node->screen_pid());
+    RCLCPP_INFO_STREAM(node->get_logger(), "\nTERMINATING: " << node->screen_process_name());
 
     // Shutdown ROS
     rclcpp::shutdown();

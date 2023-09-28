@@ -140,7 +140,7 @@ class ExecuteProcessRemoteSSH(LaunchDescription):
                     name='remote_process_handler_' + self.uuid_short,
                     namespace=ReplaceTextSubstitution(self.__machine, '.', '_'),
                     output='screen',
-                    parameters=[{'screen_pid': process_name_list}],
+                    parameters=[{'screen_process_name': process_name_list}],
                     condition=self.__condition,
                 ),
             ]
