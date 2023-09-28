@@ -47,7 +47,7 @@ def generate_launch_description():
         elif 'machine:=' in argv:
             machine = argv.replace('machine:=', '')
 
-    remote_install_space = '/home/' + user + '/launch_remote_ssh_test/install'
+    remote_install_space = '/tmp/launch_remote_ssh_test/install'
 
     # Copy files to remote install space
     copy_single_package_install(user, machine, 'launch_remote_ssh', remote_install_space)
