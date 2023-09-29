@@ -37,9 +37,10 @@ install(TARGETS
 # Launch utilities
 ament_python_install_package(launch_remote_ssh PACKAGE_DIR launch_remote_ssh)
 
-# Copy install space utility script
+# Copy utility scripts
 install(PROGRAMS
   scripts/copy_install_space.py
+  scripts/stop_all_remote_processes
   DESTINATION lib/${PROJECT_NAME}
 )
 
