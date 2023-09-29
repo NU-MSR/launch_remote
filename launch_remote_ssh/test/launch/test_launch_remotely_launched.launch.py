@@ -42,8 +42,8 @@ def generate_launch_description():
         ),
         Node(
             package='launch_remote_ssh',
-            executable='param_tester.py',
-            name='param1_tester',
+            executable='param_node.py',
+            name='param1_node',
             parameters=[{'param': LaunchConfiguration('param1')}],
         ),
         DeclareLaunchArgument(
@@ -52,8 +52,8 @@ def generate_launch_description():
         ),
         Node(
             package='launch_remote_ssh',
-            executable='param_tester.py',
-            name='param2_tester',
+            executable='param_node.py',
+            name='param2_node',
             parameters=[{'param': LaunchConfiguration('param2')}],
         ),
         DeclareLaunchArgument(
@@ -62,8 +62,8 @@ def generate_launch_description():
         ),
         Node(
             package='launch_remote_ssh',
-            executable='param_tester.py',
-            name='param3_tester',
+            executable='param_node.py',
+            name='param3_node',
             parameters=[{'param': LaunchConfiguration('param3')}],
         ),
     ])

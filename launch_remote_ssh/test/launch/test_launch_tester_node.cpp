@@ -129,7 +129,7 @@ TEST_CASE("launch_remote_ssh_test", "[launch_remote_ssh]") {
     param_clients.push_back(
       std::make_shared<rclcpp::SyncParametersClient>(
         node,
-        "param" + std::to_string(i + 1) + "_tester"
+        "param" + std::to_string(i + 1) + "_node"
       )
     );
   }

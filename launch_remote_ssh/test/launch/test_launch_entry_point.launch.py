@@ -80,7 +80,7 @@ def generate_launch_description():
             user=LaunchConfiguration('user'),
             machine=LaunchConfiguration('machine'),
             package='launch_remote_ssh',
-            launch_file='test_remotely_launched.launch.py',
+            launch_file='test_launch_remotely_launched.launch.py',
             source_paths=[
                 remote_install_space + '/launch_remote_ssh/share/launch_remote_ssh/local_setup.bash',
             ],
@@ -92,7 +92,7 @@ def generate_launch_description():
         ),
         Catch2IntegrationTestNode(
             package='launch_remote_ssh',
-            executable='tester_node',
+            executable='test_launch_tester_node',
             parameters=[{
                 'test_duration': LaunchConfiguration('test_duration'),
                 'param1': LaunchConfiguration('param1'),
