@@ -36,6 +36,7 @@
 #include <string>
 
 using namespace std::chrono_literals;
+using Catch::Matchers::Equals;
 
 bool killed = false;
 
@@ -86,65 +87,168 @@ private:
   std::string result_ = "FAILURE";
 };
 
-TEST_CASE("launch_remote_ssh_test", "[launch_remote_ssh]") {
+template<typename T>
+void check_array(std::vector<T> actual, std::vector<T> expected)
+{
+  REQUIRE(actual.size() == expected.size());
+  for (size_t i = 0; i < expected.size(); i++)
+  {
+    REQUIRE(actual.at(i) == expected.at(i));
+  }
+}
+
+void check_string_array(std::vector<std::string> actual, std::vector<std::string> expected)
+{
+  REQUIRE(actual.size() == expected.size());
+  for (size_t i = 0; i < expected.size(); i++)
+  {
+    REQUIRE_THAT(actual.at(i), Equals(expected.at(i)));
+  }
+}
+
+TEST_CASE("node_remote_ssh_test", "[node_remote_ssh]") {
   auto node = rclcpp::Node::make_shared(
     "tester_node",
     rclcpp::NodeOptions().automatically_declare_parameters_from_overrides(true)
   );
 
-  // auto TEST_DURATION = 60.0;
+  auto TEST_DURATION = 20.0;
 
-  // if (node->has_parameter("test_duration"))
-  // {
-  //   TEST_DURATION = node->get_parameter("test_duration").as_double();
-  // }
-  // else
-  // {
-  //   TEST_DURATION = node->declare_parameter<double>("test_duration", 60.0);
-  // }
+  if (node->has_parameter("test_duration"))
+  {
+    TEST_DURATION = node->get_parameter("test_duration").as_double();
+  }
+  else
+  {
+    TEST_DURATION = node->declare_parameter<double>("test_duration", TEST_DURATION);
+  }
 
-  // size_t NUM_PARAMS = 0;
+  REQUIRE(node->has_parameter("num_params1"));
+  const size_t NUM_PARAMS1 = node->get_parameter("num_params1").as_int();
 
-  // // Determine the number of parameters passed in for testing
-  // while (true)
-  // {
-  //   if (node->has_parameter("param" + std::to_string(NUM_PARAMS + 1)))
-  //   {
-  //     NUM_PARAMS++;
-  //   }
-  //   else
-  //   {
-  //     break;
-  //   }
-  // }
+  auto params1_client =
+    std::make_shared<rclcpp::SyncParametersClient>(node, "/param_nodes/param_node1");
 
-  // RCLCPP_INFO_STREAM(node->get_logger(), "Testing " << NUM_PARAMS << " parameters");
-  // REQUIRE(NUM_PARAMS != 0);
-
-  // std::vector<std::shared_ptr<rclcpp::SyncParametersClient>> param_clients;
-
-  // // Construct list of parameter clients
-  // for (size_t i = 0; i < NUM_PARAMS; i++)
-  // {
-  //   param_clients.push_back(
-  //     std::make_shared<rclcpp::SyncParametersClient>(
-  //       node,
-  //       "param" + std::to_string(i + 1) + "_node"
-  //     )
-  //   );
-  // }
-
+  
   rclcpp::Time start_time = rclcpp::Clock().now();
 
-  // size_t param_ndx = 0;
+  bool service_found = false;
 
-  // // Keep test running only for the length test duration (in seconds)
-  // while (
-  //   rclcpp::ok() &&
-  //   ((rclcpp::Clock().now() - start_time) < rclcpp::Duration::from_seconds(TEST_DURATION))
-  // )
-  // {
-  //   if (param_clients.at(param_ndx)->wait_for_service(0s))
+  // Keep test running only for the length test duration (in seconds)
+  while (
+    rclcpp::ok() &&
+    ((rclcpp::Clock().now() - start_time) < rclcpp::Duration::from_seconds(TEST_DURATION))
+  )
+  {
+
+    if (params1_client->wait_for_service(0s)) {
+      service_found = true;
+      break;
+    }
+
+    rclcpp::spin_some(node);
+  }
+
+  REQUIRE(service_found);
+
+  std::vector<std::string> params1_names (NUM_PARAMS1);
+
+  for (size_t i = 0; i < NUM_PARAMS1; i++)
+  {
+    params1_names.at(i) = "param" + std::to_string(i);
+  }
+
+  const auto params1_received = params1_client->get_parameters(params1_names, 10s);
+
+  REQUIRE(params1_received.size() == NUM_PARAMS1);
+
+  REQUIRE(params1_received.at(0).get_type() == rclcpp::ParameterType::PARAMETER_BOOL);
+  REQUIRE(params1_received.at(0).as_bool() == false);
+
+  REQUIRE(params1_received.at(1).get_type() == rclcpp::ParameterType::PARAMETER_STRING);
+  REQUIRE_THAT(params1_received.at(1).as_string(), Equals("happy!"));
+
+  REQUIRE(params1_received.at(2).get_type() == rclcpp::ParameterType::PARAMETER_INTEGER);
+  REQUIRE(params1_received.at(2).as_int() == -256);
+
+  REQUIRE(params1_received.at(3).get_type() == rclcpp::ParameterType::PARAMETER_DOUBLE);
+  REQUIRE(params1_received.at(3).as_double() == 42.42);
+
+  REQUIRE(params1_received.at(4).get_type() == rclcpp::ParameterType::PARAMETER_BOOL_ARRAY);
+  REQUIRE(params1_received.at(4).as_bool_array().size() == 5);
+  check_array(params1_received.at(4).as_bool_array(), {false, true, false, true , true});
+
+  REQUIRE(params1_received.at(5).get_type() == rclcpp::ParameterType::PARAMETER_STRING_ARRAY);
+  REQUIRE(params1_received.at(5).as_string_array().size() == 5);
+  check_string_array(params1_received.at(5).as_string_array(), {"I", "like", "when", "things", "work"});
+
+  REQUIRE(params1_received.at(6).get_type() == rclcpp::ParameterType::PARAMETER_STRING);
+  REQUIRE_THAT(params1_received.at(6).as_string(), Equals("But this is a single string"));
+
+  REQUIRE(params1_received.at(7).get_type() == rclcpp::ParameterType::PARAMETER_INTEGER_ARRAY);
+  REQUIRE(params1_received.at(7).as_integer_array().size() == 9);
+  check_array(params1_received.at(7).as_integer_array(), {9,8,7,6,5,4,3,2,1});
+
+  REQUIRE(params1_received.at(8).get_type() == rclcpp::ParameterType::PARAMETER_DOUBLE_ARRAY);
+  REQUIRE(params1_received.at(8).as_double_array().size() == 9);
+  check_array(params1_received.at(8).as_double_array(), {9.0,8.0,7.0,6.0,5.0,4.0,3.0,2.0,1.0});
+
+  REQUIRE(params1_received.at(9).get_type() == rclcpp::ParameterType::PARAMETER_STRING_ARRAY);
+  REQUIRE(params1_received.at(9).as_string_array().size() == 6);
+  check_string_array(params1_received.at(9).as_string_array(), {"This", "is", "not", "a", "single", "string"});
+
+  REQUIRE(params1_received.at(10).get_type() == rclcpp::ParameterType::PARAMETER_STRING);
+  REQUIRE_THAT(params1_received.at(10).as_string(), Equals("hello world"));
+
+  REQUIRE(params1_received.at(11).get_type() == rclcpp::ParameterType::PARAMETER_BOOL);
+  REQUIRE(params1_received.at(11).as_bool() == true);
+
+  REQUIRE(params1_received.at(12).get_type() == rclcpp::ParameterType::PARAMETER_INTEGER);
+  REQUIRE(params1_received.at(12).as_int() == 45);
+
+  REQUIRE(params1_received.at(13).get_type() == rclcpp::ParameterType::PARAMETER_BOOL_ARRAY);
+  REQUIRE(params1_received.at(13).as_bool_array().size() == 5);
+  check_array(params1_received.at(13).as_bool_array(), {false, true, false, true , false});
+
+  REQUIRE(params1_received.at(14).get_type() == rclcpp::ParameterType::PARAMETER_INTEGER_ARRAY);
+  REQUIRE(params1_received.at(14).as_integer_array().size() == 9);
+  check_array(params1_received.at(14).as_integer_array(), {1,2,3,4,5,6,7,8,9});
+
+  REQUIRE(params1_received.at(15).get_type() == rclcpp::ParameterType::PARAMETER_DOUBLE_ARRAY);
+  REQUIRE(params1_received.at(15).as_double_array().size() == 9);
+  check_array(params1_received.at(15).as_double_array(), {1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0});
+
+  REQUIRE(params1_received.at(16).get_type() == rclcpp::ParameterType::PARAMETER_BOOL);
+  REQUIRE(params1_received.at(16).as_bool() == true);
+
+  REQUIRE(params1_received.at(17).get_type() == rclcpp::ParameterType::PARAMETER_STRING);
+  REQUIRE_THAT(params1_received.at(17).as_string(), Equals("movin and groovin"));
+
+  REQUIRE(params1_received.at(18).get_type() == rclcpp::ParameterType::PARAMETER_INTEGER);
+  REQUIRE(params1_received.at(18).as_int() == 89745);
+
+  REQUIRE(params1_received.at(19).get_type() == rclcpp::ParameterType::PARAMETER_DOUBLE);
+  REQUIRE(params1_received.at(19).as_double() == -89.45);
+
+  REQUIRE(params1_received.at(20).get_type() == rclcpp::ParameterType::PARAMETER_BOOL_ARRAY);
+  REQUIRE(params1_received.at(20).as_bool_array().size() == 6);
+  check_array(params1_received.at(20).as_bool_array(), {true, true, true, true, true, false});
+
+  REQUIRE(params1_received.at(21).get_type() == rclcpp::ParameterType::PARAMETER_STRING_ARRAY);
+  REQUIRE(params1_received.at(21).as_string_array().size() == 4);
+  check_string_array(params1_received.at(21).as_string_array(), {"it", "is", "party", "time"});
+  
+  REQUIRE(params1_received.at(22).get_type() == rclcpp::ParameterType::PARAMETER_INTEGER_ARRAY);
+  REQUIRE(params1_received.at(22).as_integer_array().size() == 3);
+  check_array(params1_received.at(22).as_integer_array(), {123, 456, 789});
+
+  REQUIRE(params1_received.at(23).get_type() == rclcpp::ParameterType::PARAMETER_DOUBLE_ARRAY);
+  REQUIRE(params1_received.at(23).as_double_array().size() == 3);
+  check_array(params1_received.at(23).as_double_array(), {9.87, 6.54, 3.21});
+
+  
+
+  // if (param_clients.at(param_ndx)->wait_for_service(0s))
   //   {
   //     // Get parameter from remote parameter node
   //     const auto param_received = param_clients.at(param_ndx)->get_parameters({"param0"})[0];
@@ -176,9 +280,6 @@ TEST_CASE("launch_remote_ssh_test", "[launch_remote_ssh]") {
   //       break;
   //     }
   //   }
-
-  //   rclcpp::spin_some(node);
-  // }
 
   // // Ensure all parameters were checked
   // CHECK(NUM_PARAMS == param_ndx);

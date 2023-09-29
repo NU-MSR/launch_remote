@@ -66,6 +66,10 @@ def generate_launch_description():
             name='machine',
         ),
         SetLaunchConfiguration(
+            name='num_params1',
+            value='25'
+        ),
+        SetLaunchConfiguration(
             name='param10_name',
             value='param10'
         ),
@@ -118,7 +122,7 @@ def generate_launch_description():
             name='param_node1',
             namespace='param_nodes',
             parameters=[
-                {'num_params': 25},
+                {'num_params': LaunchConfiguration('num_params1')},
                 {
                     'param0': False,
                     'param1': 'happy!',
@@ -214,6 +218,7 @@ def generate_launch_description():
             executable='test_node_tester_node',
             parameters=[{
                 'test_duration': LaunchConfiguration('test_duration'),
+                'num_params1': LaunchConfiguration('num_params1'),
             }],
         )
     ])
