@@ -64,6 +64,42 @@ def generate_launch_description():
         DeclareLaunchArgument(
             name='machine',
         ),
+        SetLaunchConfiguration(
+            name='param10_name',
+            value='param10'
+        ),
+        SetLaunchConfiguration(
+            name='param10_value',
+            value='hello world'
+        ),
+        SetLaunchConfiguration(
+            name='param11_name',
+            value='param11'
+        ),
+        SetLaunchConfiguration(
+            name='param11_value',
+            value='true'
+        ),
+        SetLaunchConfiguration(
+            name='param12_name',
+            value='param12'
+        ),
+        SetLaunchConfiguration(
+            name='param12_value',
+            value='45'
+        ),
+        SetLaunchConfiguration(
+            name='param13_value',
+            value='False'
+        ),
+        SetLaunchConfiguration(
+            name='param14_value',
+            value='3'
+        ),
+        SetLaunchConfiguration(
+            name='param15_value',
+            value='8.0'
+        ),
         NodeRemoteSSH(
             user=LaunchConfiguration('user'),
             machine=LaunchConfiguration('machine'),
@@ -81,7 +117,7 @@ def generate_launch_description():
             name='param_node1',
             namespace='param_nodes',
             parameters=[
-                {'num_params': 10},
+                {'num_params': 16},
                 {
                     'param0': False,
                     'param1': 'happy!',
@@ -93,6 +129,12 @@ def generate_launch_description():
                     'param7': [9,8,7,6,5,4,3,2,1],
                     'param8': [9.0,8,7,6,5,4,3,2,1],
                     'param9': ['This', [TextSubstitution(text='is'), 'not'], 'a', 'single', 'string'],
+                    LaunchConfiguration('param10_name'): LaunchConfiguration('param10_value'),
+                    LaunchConfiguration('param11_name'): LaunchConfiguration('param11_value'),
+                    LaunchConfiguration('param12_name'): LaunchConfiguration('param12_value'),
+                    'param13': [False, True, False, True, LaunchConfiguration('param13_value')],
+                    'param14': [1,2,LaunchConfiguration('param14_value'),4,5,6,7,8,9],
+                    'param15': [1.0,2.0,3.0,4.0,5.0,6.0,7.0,LaunchConfiguration('param15_value'),9.0],
                 },
             ]
         ),
