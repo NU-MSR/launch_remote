@@ -32,19 +32,25 @@
 
 import rclpy
 from rclpy.node import Node
-from rcl_interfaces.msg import ParameterDescriptor
+from std_srvs.srv import Empty
 
-class ParamNode(Node):
+class ServiceNode(Node):
     def __init__(self):
-        super().__init__("param_node")
-        num_params = self.declare_parameter("num_params", 0).get_parameter_value().integer_value
-        for i in range(num_params):
-            self.declare_parameter(f"param{i}", descriptor=ParameterDescriptor(dynamic_typing=True))
+        super().__init__("service_node")
+        num_services = self.declare_parameter("num_services", 0).get_parameter_value().integer_value
+
+        srv_list = []
+
+        for i in range(num_services):
+            srv_list.append(self.create_service(Empty,f'srv{i}',self.srv_callback))
+
+    def srv_callback(self, request, response):
+        return response
 
 def main(args=None):
     """Spin the node."""
     rclpy.init(args=args)
-    this_node = ParamNode()
+    this_node = ServiceNode()
     rclpy.spin(this_node)
     rclpy.shutdown()
 

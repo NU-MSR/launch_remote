@@ -147,7 +147,7 @@ TEST_CASE("launch_remote_ssh_test", "[launch_remote_ssh]") {
     if (param_clients.at(param_ndx)->wait_for_service(0s))
     {
       // Get parameter from remote parameter node
-      const auto param_received = param_clients.at(param_ndx)->get_parameters({"param"})[0];
+      const auto param_received = param_clients.at(param_ndx)->get_parameters({"param0"})[0];
 
       // Get same parameter on this node
       const auto param_input_name = "param" + std::to_string(param_ndx + 1);

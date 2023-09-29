@@ -62,6 +62,7 @@ if(BUILD_TESTING)
   # Node for testing remote launch capabilities
   install(PROGRAMS
     test/param_node.py
+    test/service_node.py
     DESTINATION lib/${PROJECT_NAME}
   )
   # Launch files for testing remote launch capabilities
