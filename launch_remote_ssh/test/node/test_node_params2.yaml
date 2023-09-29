@@ -1,0 +1,6 @@
+/**:
+  ros__parameters:
+    param20: [True, True, True, True, True, False]
+    param21: ['it', 'is', 'party', 'time']
+    param22: [123, 456, 789]
+    param23: [9.87, 6.54, 3.21]

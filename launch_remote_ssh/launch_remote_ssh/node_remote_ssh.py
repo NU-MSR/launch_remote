@@ -45,8 +45,6 @@ from launch.utilities import ensure_argument_type
 from launch.utilities import normalize_to_list_of_substitutions
 from launch.utilities.type_utils import SomeValueType
 from launch.utilities.type_utils import ScalarValueType
-from launch.utilities.type_utils import SomeScalarType
-from launch.utilities.type_utils import SomeSequenceType
 from launch_ros.utilities import normalize_remap_rules
 from launch_ros.parameters_type import SomeParameters
 from launch_ros.remap_rule_type import SomeRemapRules

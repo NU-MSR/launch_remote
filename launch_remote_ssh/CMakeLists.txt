@@ -74,6 +74,7 @@ if(BUILD_TESTING)
   )
   install(FILES
     test/node/test_node_params1.yaml
+    test/node/test_node_params2.yaml
     DESTINATION share/${PROJECT_NAME}/test
   )
   # catch_ros2 tester nodes
