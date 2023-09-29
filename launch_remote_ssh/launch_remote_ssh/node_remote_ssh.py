@@ -202,7 +202,7 @@ def _name_and_value_to_substitution_list(
 
     return normalize_to_list_of_substitutions(out)
 
-def _scalar_value_to_substitution_list(value : Union[ScalarValueType, Substitution, Sequence[Union[str, Substitution]]]) -> List[Substitution]:
+def _scalar_value_to_substitution_list(value : Union[ScalarValueType, Substitution]) -> List[Substitution]:
     out : List[SomeSubstitutionsType] = []
     if isinstance(value, Union[int, float, bool]):
         out.append(str(value))
@@ -249,7 +249,7 @@ def _sequence_value_to_substitution_list(value : Sequence) -> List[Substitution]
         make_mypy_happy_float = cast(List[Union[int, float]], value)
         out.append(start_str)
         for val in make_mypy_happy_float:
-            out += _scalar_value_to_substitution_list(val)
+            out += _scalar_value_to_substitution_list(float(val))
             out.append(',')
         out[-1] = end_str
     elif Substitution in has_types and has_types.issubset({str, Substitution}):
@@ -267,11 +267,22 @@ def _sequence_value_to_substitution_list(value : Sequence) -> List[Substitution]
         # Should evaluate to a list of strings
         # Normalize to a list of lists of substitutions
         out.append(start_str)
-        for val in value:
-            out += _scalar_value_to_substitution_list(val)
-            out.append(',')
+        out += _recursive_string_list_to_substitution_list(value)
         out[-1] = end_str
 
+    return normalize_to_list_of_substitutions(out)
+
+def _recursive_string_list_to_substitution_list(value : Sequence) -> List[Substitution]:
+    out : List[SomeSubstitutionsType] = []
+    for val in value:
+        if isinstance(val, str):
+            out += _scalar_value_to_substitution_list(val)
+            out.append(',')
+        elif isinstance(val, Sequence):
+            out += _recursive_string_list_to_substitution_list(val)
+        else:
+            out += _scalar_value_to_substitution_list(val)
+            out.append(',')
     return normalize_to_list_of_substitutions(out)
 
 def _parameter_file_to_substitution_list(param_file : ParameterFile) -> List[Substitution]:

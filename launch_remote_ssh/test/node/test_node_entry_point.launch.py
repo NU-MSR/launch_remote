@@ -30,7 +30,7 @@
 
 import sys
 
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, TextSubstitution
 from launch.actions import SetLaunchConfiguration, DeclareLaunchArgument
 from launch_remote_ssh import NodeRemoteSSH, copy_single_package_install
 from launch_catch_ros2 import Catch2LaunchDescription, Catch2IntegrationTestNode
@@ -83,10 +83,16 @@ def generate_launch_description():
             parameters=[
                 {'num_params': 10},
                 {
-                    'param0': 5,
-                    'param1': 'sentence with spaces',
-                    'param2': [False, True],
-                    'param3': [4,2]
+                    'param0': False,
+                    'param1': 'happy!',
+                    'param2': -256,
+                    'param3': 42.42,
+                    'param4': [False, True, False, True, True],
+                    'param5': ['I', 'like', 'when', 'things', 'work'],
+                    'param6': ['But ', TextSubstitution(text='this is'), ' a ', 'single', ' string'],
+                    'param7': [9,8,7,6,5,4,3,2,1],
+                    'param8': [9.0,8,7,6,5,4,3,2,1],
+                    'param9': ['This', [TextSubstitution(text='is'), 'not'], 'a', 'single', 'string'],
                 },
             ]
         ),
