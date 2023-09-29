@@ -61,15 +61,14 @@ class NodeRemoteSSH(ExecuteProcessRemoteSSH):
         machine : SomeSubstitutionsType,
         package : SomeSubstitutionsType,
         executable : SomeSubstitutionsType,
-        # TODO(anyone) anything between these lines is not well tested
         name: Optional[SomeSubstitutionsType] = None,
         namespace: Optional[SomeSubstitutionsType] = None,
         parameters: Optional[SomeParameters] = None,  # If any of these are yaml files they must be
-                                                      # present on the remote system
+                                                      # present on the remote system, and this must
+                                                      # be the path on the remote system
         remappings: Optional[SomeRemapRules] = None,
         ros_arguments: Optional[Iterable[SomeSubstitutionsType]] = None,
         arguments: Optional[Iterable[SomeSubstitutionsType]] = None,
-        # TODO(anyone) anything between these lines is not well tested
         port : Optional[SomeSubstitutionsType] = None,
         source_paths : Optional[Iterable[SomeSubstitutionsType]] = None,
         condition : Optional[Condition] = None

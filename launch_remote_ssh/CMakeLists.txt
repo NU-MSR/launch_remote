@@ -88,6 +88,16 @@ if(BUILD_TESTING)
     test_launch_tester_node
     DESTINATION lib/${PROJECT_NAME}
   )
+  add_executable(test_node_tester_node
+    test/node/test_node_tester_node.cpp
+  )
+  target_link_libraries(test_node_tester_node
+    catch_ros2::catch_ros2_with_node_main
+  )
+  install(TARGETS
+    test_node_tester_node
+    DESTINATION lib/${PROJECT_NAME}
+  )
 endif()
 
 ament_export_dependencies(

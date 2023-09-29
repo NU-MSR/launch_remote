@@ -209,15 +209,11 @@ def generate_launch_description():
                 ('srv4', LaunchConfiguration('srv4_remap'))
             ]
         ),
-        
-        # Catch2IntegrationTestNode(
-        #     package='launch_remote_ssh',
-        #     executable='test_launch_tester_node',
-        #     parameters=[{
-        #         'test_duration': LaunchConfiguration('test_duration'),
-        #         'param1': LaunchConfiguration('param1'),
-        #         'param2': LaunchConfiguration('param2'),
-        #         'param3': LaunchConfiguration('param3'),
-        #     }],
-        # )
+        Catch2IntegrationTestNode(
+            package='launch_remote_ssh',
+            executable='test_node_tester_node',
+            parameters=[{
+                'test_duration': LaunchConfiguration('test_duration'),
+            }],
+        )
     ])
