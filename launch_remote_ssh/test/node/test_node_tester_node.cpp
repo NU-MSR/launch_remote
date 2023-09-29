@@ -30,6 +30,7 @@
 
 #include "catch_ros2/catch.hpp"
 #include "rclcpp/rclcpp.hpp"
+#include "std_srvs/srv/empty.hpp"
 #include <cstdio>
 #include <fstream>
 #include <sstream>
@@ -246,43 +247,90 @@ TEST_CASE("node_remote_ssh_test", "[node_remote_ssh]") {
   REQUIRE(params1_received.at(23).as_double_array().size() == 3);
   check_array(params1_received.at(23).as_double_array(), {9.87, 6.54, 3.21});
 
-  
+  REQUIRE(params1_received.at(24).get_type() == rclcpp::ParameterType::PARAMETER_INTEGER);
+  REQUIRE(params1_received.at(24).as_int() == 1337);
 
-  // if (param_clients.at(param_ndx)->wait_for_service(0s))
-  //   {
-  //     // Get parameter from remote parameter node
-  //     const auto param_received = param_clients.at(param_ndx)->get_parameters({"param0"})[0];
+  REQUIRE(node->has_parameter("num_params2"));
+  const size_t NUM_PARAMS2 = node->get_parameter("num_params2").as_int();
 
-  //     // Get same parameter on this node
-  //     const auto param_input_name = "param" + std::to_string(param_ndx + 1);
-  //     const auto param_input = node->get_parameter(param_input_name);
+  auto params2_client =
+    std::make_shared<rclcpp::SyncParametersClient>(node, "/param_nodes/param_node2");
 
-  //     RCLCPP_INFO_STREAM(node->get_logger(), param_input_name << " found:");
-  //     RCLCPP_INFO_STREAM(
-  //       node->get_logger(),
-  //       "Input:\tType(" << param_input.get_type_name()
-  //       << ")\tValue(" << param_input.value_to_string() << ")"
-  //     );
-  //     RCLCPP_INFO_STREAM(
-  //       node->get_logger(),
-  //       "Received:\tType(" << param_received.get_type_name()
-  //       << ")\tValue(" << param_received.value_to_string() << ")"
-  //     );
+  service_found = false;
 
-  //     // Test that the types and values match
-  //     CHECK(param_received.get_type() == param_input.get_type());
-  //     CHECK(param_received.get_parameter_value() == param_input.get_parameter_value());
+  // Keep test running only for the length test duration (in seconds)
+  while (
+    rclcpp::ok() &&
+    ((rclcpp::Clock().now() - start_time) < rclcpp::Duration::from_seconds(TEST_DURATION))
+  )
+  {
 
-  //     param_ndx++;
+    if (params1_client->wait_for_service(0s)) {
+      service_found = true;
+      break;
+    }
 
-  //     if (param_ndx >= NUM_PARAMS)
-  //     {
-  //       break;
-  //     }
-  //   }
+    rclcpp::spin_some(node);
+  }
 
-  // // Ensure all parameters were checked
-  // CHECK(NUM_PARAMS == param_ndx);
+  REQUIRE(service_found);
+
+  std::vector<std::string> params2_names (NUM_PARAMS2);
+
+  for (size_t i = 0; i < NUM_PARAMS2; i++)
+  {
+    params2_names.at(i) = "param" + std::to_string(i);
+  }
+
+  const auto params2_received = params2_client->get_parameters(params2_names, 10s);
+
+  REQUIRE(params2_received.size() == NUM_PARAMS2);
+
+  REQUIRE(params2_received.at(0).get_type() == rclcpp::ParameterType::PARAMETER_STRING);
+  REQUIRE_THAT(params2_received.at(0).as_string(), Equals("Success"));
+
+
+  const std::vector<std::string> services1_names = {
+    "/service_nodes/first_service",
+    "/service_nodes/second_service",
+    "/service_nodes/third_service",
+    "/service_nodes/service_node1/fourth_service",
+    "/service_nodes/service_node1/fifth_service"
+  };
+
+  REQUIRE(node->has_parameter("num_services1"));
+  const size_t NUM_SERVICES1 = node->get_parameter("num_services1").as_int();
+
+  std::vector<rclcpp::Client<std_srvs::srv::Empty>::SharedPtr> services1_clients (NUM_SERVICES1);
+
+  for (size_t i = 0; i < NUM_SERVICES1; i++)
+  {
+    services1_clients.at(i) = node->create_client<std_srvs::srv::Empty>(services1_names.at(i));
+  }
+
+  size_t services_counter = 0;
+
+  while (
+    rclcpp::ok() &&
+    ((rclcpp::Clock().now() - start_time) < rclcpp::Duration::from_seconds(TEST_DURATION))
+  )
+  {
+
+    if (services_counter >= NUM_SERVICES1)
+    {
+      break;
+    }
+    else if (services1_clients.at(services_counter)->wait_for_service(0s))
+    {
+      services_counter++;
+    }
+
+    rclcpp::spin_some(node);
+  }
+
+  REQUIRE(services_counter == NUM_SERVICES1);
+
+
 
   RCLCPP_INFO_STREAM(node->get_logger(), "--------------------ACTION REQUIRED--------------------");
   RCLCPP_INFO_STREAM(node->get_logger(), "Please terminate the launch file to continue the test.");

@@ -56,6 +56,7 @@ if(BUILD_TESTING)
   # ament_lint_auto_find_test_dependencies()
 
   find_package(rclpy REQUIRED)
+  find_package(std_srvs REQUIRED)
   find_package(catch_ros2 REQUIRED)
   include(CTest)
 
@@ -90,6 +91,9 @@ if(BUILD_TESTING)
   )
   add_executable(test_node_tester_node
     test/node/test_node_tester_node.cpp
+  )
+  ament_target_dependencies(test_node_tester_node
+    std_srvs
   )
   target_link_libraries(test_node_tester_node
     catch_ros2::catch_ros2_with_node_main

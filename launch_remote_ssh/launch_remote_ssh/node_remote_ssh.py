@@ -88,13 +88,13 @@ class NodeRemoteSSH(ExecuteProcessRemoteSSH):
         argument_list = []
         for argument in self.__arguments:
             argument_list.append(' ')
-            argument_list.append(argument)
+            argument_list += normalize_to_list_of_substitutions(argument)
 
         # Build ros argument list
         ros_argument_list = []
         for ros_argument in self.__ros_arguments:
             ros_argument_list.append(' ')
-            ros_argument_list.append(ros_argument)
+            ros_argument_list += normalize_to_list_of_substitutions(ros_argument)
 
         # Remap node name
         if self.__node_name is not None:
