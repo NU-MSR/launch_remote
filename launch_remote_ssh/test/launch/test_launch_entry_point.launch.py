@@ -56,7 +56,7 @@ def generate_launch_description():
     return Catch2LaunchDescription([
         DeclareLaunchArgument(
             name='test_duration',
-            default_value='60.0',
+            default_value='20.0',
         ),
         DeclareLaunchArgument(
             name='user',

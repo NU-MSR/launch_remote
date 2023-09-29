@@ -92,7 +92,7 @@ TEST_CASE("launch_remote_ssh_test", "[launch_remote_ssh]") {
     rclcpp::NodeOptions().automatically_declare_parameters_from_overrides(true)
   );
 
-  auto TEST_DURATION = 60.0;
+  auto TEST_DURATION = 20.0;
 
   if (node->has_parameter("test_duration"))
   {
@@ -100,7 +100,7 @@ TEST_CASE("launch_remote_ssh_test", "[launch_remote_ssh]") {
   }
   else
   {
-    TEST_DURATION = node->declare_parameter<double>("test_duration", 60.0);
+    TEST_DURATION = node->declare_parameter<double>("test_duration", TEST_DURATION);
   }
 
   size_t NUM_PARAMS = 0;
