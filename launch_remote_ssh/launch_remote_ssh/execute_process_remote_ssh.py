@@ -60,7 +60,7 @@ class ExecuteProcessRemoteSSH(LaunchDescription):
         self.__machine = machine
         self.__command = command
         self.__port = port
-        self.__source_paths = source_paths
+        self.__source_paths = [] if source_paths is None else source_paths
         self.__condition = condition
         self.__uuid = uuid4()
 

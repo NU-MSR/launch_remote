@@ -65,13 +65,15 @@ class NodeRemoteSSH(ExecuteProcessRemoteSSH):
         self.__node_executable = executable
         self.__node_name = name
         self.__node_namespace = namespace
-        self.__arguments = arguments
-        self.__ros_arguments = ros_arguments
+        self.__arguments = [] if arguments is None else arguments
+        self.__ros_arguments = [] if ros_arguments is None else ros_arguments
         self.__remappings = [] if remappings is None else list(normalize_remap_rules(remappings))
         if parameters is not None:
             ensure_argument_type(parameters, (list), 'parameters', 'Node')
             normalized_params = normalize_parameters(parameters)
         self.__parameters = [] if parameters is None else normalized_params
+
+        
 
         # Build argument list
         argument_list = []

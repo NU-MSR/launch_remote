@@ -69,9 +69,10 @@ if(BUILD_TESTING)
   install(FILES
     test/launch/test_launch_entry_point.launch.py
     test/launch/test_launch_remotely_launched.launch.py
+    test/node/test_node_entry_point.launch.py
     DESTINATION share/${PROJECT_NAME}/launch
   )
-  # catch_ros2 tester node
+  # catch_ros2 tester nodes
   add_executable(test_launch_tester_node
     test/launch/test_launch_tester_node.cpp
   )
