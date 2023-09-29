@@ -170,7 +170,6 @@ def _mapping_to_substitution_list(
             out += _name_and_value_to_substitution_list(name, value.value)
         elif isinstance(value, Union[ScalarValueType, Substitution, Sequence]):
             out += _name_and_value_to_substitution_list(name, value)
-        # TODO sequence
         elif isinstance(value, bytes):
             out += _name_and_value_to_substitution_list(name, str(value))
         else:
