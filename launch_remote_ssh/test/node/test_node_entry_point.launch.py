@@ -108,10 +108,10 @@ def generate_launch_description():
             executable='param_node.py',
             source_paths=[
                 PathJoinSubstitution([
-                    remote_install_space,
-                    'launch_remote_ssh',
-                    'share',
-                    'launch_remote_ssh',
+                    FindPackageShareRemote(
+                        remote_install_space,
+                        'launch_remote_ssh',
+                    ),
                     'local_setup.bash'
                 ])
             ],
@@ -150,6 +150,63 @@ def generate_launch_description():
                     ]),
                 ),
                 Parameter('param24', 1337),
+            ]
+        ),
+        NodeRemoteSSH(
+            user=LaunchConfiguration('user'),
+            machine=LaunchConfiguration('machine'),
+            package='launch_remote_ssh',
+            executable='param_node.py',
+            source_paths=[
+                PathJoinSubstitution([
+                    FindPackageShareRemote(
+                        remote_install_space,
+                        'launch_remote_ssh',
+                    ),
+                    'local_setup.bash'
+                ])
+            ],
+            name='param_node2',
+            namespace='param_nodes',
+            arguments=['--ros-args', '-p', 'num_params:=1'],
+            parameters=[{'param0': 'Success'}],
+        ),
+        SetLaunchConfiguration(
+            name='srv3_name',
+            value='srv3'
+        ),
+        SetLaunchConfiguration(
+            name='srv4_remap',
+            value='~/fifth_service'
+        ),
+        NodeRemoteSSH(
+            user=LaunchConfiguration('user'),
+            machine=LaunchConfiguration('machine'),
+            package='launch_remote_ssh',
+            executable='service_node.py',
+            source_paths=[
+                PathJoinSubstitution([
+                    FindPackageShareRemote(
+                        remote_install_space,
+                        'launch_remote_ssh',
+                    ),
+                    'local_setup.bash'
+                ])
+            ],
+            name='service_node1',
+            namespace='service_nodes',
+            ros_arguments=[
+                '--log-level',
+                'WARN',
+                '-p',
+                'num_services:=5'
+            ],
+            remappings=[
+                ('srv0', 'first_service'),
+                ('srv1', TextSubstitution(text='second_service')),
+                (TextSubstitution(text='srv2'), TextSubstitution(text='third_service')),
+                (LaunchConfiguration('srv3_name'), '~/fourth_service'),
+                ('srv4', LaunchConfiguration('srv4_remap'))
             ]
         ),
         

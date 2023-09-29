@@ -45,7 +45,6 @@ from launch.utilities import ensure_argument_type
 from launch.utilities import normalize_to_list_of_substitutions
 from launch.utilities.type_utils import SomeValueType
 from launch.utilities.type_utils import ScalarValueType
-from launch_ros.utilities import normalize_remap_rules
 from launch_ros.parameters_type import SomeParameters
 from launch_ros.remap_rule_type import SomeRemapRules
 
@@ -81,7 +80,7 @@ class NodeRemoteSSH(ExecuteProcessRemoteSSH):
         self.__node_namespace = namespace
         self.__arguments = [] if arguments is None else arguments
         self.__ros_arguments = [] if ros_arguments is None else ros_arguments
-        self.__remappings = [] if remappings is None else list(normalize_remap_rules(remappings))
+        self.__remappings = [] if remappings is None else remappings
         if parameters is not None:
             ensure_argument_type(parameters, (list), 'parameters', 'Node')
         self.__parameters = [] if parameters is None else parameters
@@ -111,9 +110,9 @@ class NodeRemoteSSH(ExecuteProcessRemoteSSH):
         # Remappings
         for remapping in self.__remappings:
             ros_argument_list.append(' -r ')
-            ros_argument_list.append(remapping[0])
+            ros_argument_list += normalize_to_list_of_substitutions(remapping[0])
             ros_argument_list.append(':=')
-            ros_argument_list.append(remapping[1])
+            ros_argument_list += normalize_to_list_of_substitutions(remapping[1])
 
         # Parameters
         # Logic modified from launch_ros.utilities.normalize_parameters
