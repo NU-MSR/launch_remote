@@ -30,7 +30,7 @@
 
 import sys
 
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch.actions import SetLaunchConfiguration, DeclareLaunchArgument
 from launch_remote_ssh import NodeRemoteSSH, copy_single_package_install
 from launch_catch_ros2 import Catch2LaunchDescription, Catch2IntegrationTestNode
@@ -68,7 +68,16 @@ def generate_launch_description():
             user=LaunchConfiguration('user'),
             machine=LaunchConfiguration('machine'),
             package='launch_remote_ssh',
-            executable='service_node.py'
+            executable='service_node.py',
+            source_paths=[
+                PathJoinSubstitution([
+                    remote_install_space,
+                    'launch_remote_ssh',
+                    'share',
+                    'launch_remote_ssh',
+                    'local_setup.bash'
+                ])
+            ],
         ),
         
         # Catch2IntegrationTestNode(
