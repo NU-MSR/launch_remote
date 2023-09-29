@@ -31,15 +31,29 @@
 from typing import Optional
 from typing import Iterable
 from typing import Mapping
+from typing import List
+from typing import Union
+from typing import Sequence
+from typing import cast
 
 from launch.some_substitutions_type import SomeSubstitutionsType
+from launch.some_substitutions_type import SomeSubstitutionsType_types_tuple
 from launch.condition import Condition
-from launch.utilities import ensure_argument_type, normalize_to_list_of_substitutions
+from launch.substitution import Substitution
+from launch.substitutions import TextSubstitution
+from launch.utilities import ensure_argument_type
+from launch.utilities import normalize_to_list_of_substitutions
+from launch.utilities.type_utils import SomeValueType
+from launch.utilities.type_utils import ScalarValueType
+from launch.utilities.type_utils import SomeScalarType
+from launch.utilities.type_utils import SomeSequenceType
+from launch_ros.utilities import normalize_remap_rules
 from launch_ros.parameters_type import SomeParameters
 from launch_ros.remap_rule_type import SomeRemapRules
-from launch_ros.utilities import normalize_remap_rules, normalize_parameters
+
 from launch_ros.parameter_descriptions import ParameterFile
 from launch_ros.parameter_descriptions import Parameter as ParameterDescription
+from launch_ros.parameter_descriptions import ParameterValue as ParameterValueDescription
 
 from .execute_process_remote_ssh import ExecuteProcessRemoteSSH, ReplaceTextSubstitution
 
@@ -72,8 +86,7 @@ class NodeRemoteSSH(ExecuteProcessRemoteSSH):
         self.__remappings = [] if remappings is None else list(normalize_remap_rules(remappings))
         if parameters is not None:
             ensure_argument_type(parameters, (list), 'parameters', 'Node')
-            normalized_params = normalize_parameters(parameters)
-        self.__parameters = [] if parameters is None else normalized_params
+        self.__parameters = [] if parameters is None else parameters
 
         # Build argument list
         argument_list = []
@@ -105,54 +118,17 @@ class NodeRemoteSSH(ExecuteProcessRemoteSSH):
             ros_argument_list.append(remapping[1])
 
         # Parameters
+        # Logic modified from launch_ros.utilities.normalize_parameters
         for parameter in self.__parameters:
-            if isinstance(parameter, ParameterFile):
-                ros_argument_list.append(' --params-file ')
-                ros_argument_list.append(
-                    ReplaceTextSubstitution(  # escape spaces in file path
-                        parameter.param_file,
-                        ' ',
-                        '\ '
-                    )
-                )
-            elif isinstance(parameter, Mapping):
-                for param_name, param_value in parameter.items():
-                    ros_argument_list.append(' -p ')
-                    ros_argument_list += normalize_to_list_of_substitutions(param_name)
-                    ros_argument_list.append(':=')
-
-                    # ReplaceTextSubstitution for \n below is not the best solution.
-                    #
-                    # These values get a \n added to the end, because in
-                    # launch_ros.utilities.normalize_parameter_dict
-                    # string values in a parameter dict get passed through yaml.dump()
-                    # 
-                    # There may be some cases where getting rid of this \n
-                    # to make the command work may be a problem? With nested parameters
-                    # or something. I think this solution should work in most cases
-                    # though
-                    ros_argument_list.append(
-                        ReplaceTextSubstitution(  # escape spaces in values
-                            ReplaceTextSubstitution(  # remove \n
-                                normalize_to_list_of_substitutions(param_value),
-                                '\n',
-                                ''
-                            ),
-                            ' ',
-                            '\ '
-                        )
-                    )
+            if isinstance(parameter, Mapping):
+                ros_argument_list += _mapping_to_substitution_list(parameter)
             elif isinstance(parameter, ParameterDescription):
-                ros_argument_list.append(' -p ')
-                ros_argument_list.append(parameter.name)
-                ros_argument_list.append(':=')
-                ros_argument_list.append(
-                    ReplaceTextSubstitution(  # escape spaces in values
-                        parameter.value,
-                        ' ',
-                        '\ '
-                    )
-                )
+                ros_argument_list += _parameter_description_to_substitution_list(parameter)
+            elif isinstance(parameter, ParameterFile):
+                ros_argument_list += _parameter_file_to_substitution_list(parameter)
+            else:
+                # It's a path
+                ros_argument_list += _parameter_file_to_substitution_list(ParameterFile(parameter))
 
         # Generate run node command
         command = [
@@ -176,3 +152,135 @@ class NodeRemoteSSH(ExecuteProcessRemoteSSH):
             source_paths=source_paths,
             condition=condition,
         )
+
+def _mapping_to_substitution_list(
+    mapping : Mapping,
+    _prefix: Optional[Sequence[Substitution]] = None
+) -> List[Substitution]:
+    out : List[SomeSubstitutionsType] = []
+
+    for name, value in mapping.items():
+        name = normalize_to_list_of_substitutions(name)
+        if _prefix:
+            combined = list(_prefix)
+            combined.append(TextSubstitution(text='.'))
+            combined.extend(name)
+            name = combined
+        
+        if isinstance(value, Mapping):
+            # Flatten recursive dictionaries
+            out += _mapping_to_substitution_list(value, _prefix=name)
+        elif isinstance(value, ParameterValueDescription):
+            out += _name_and_value_to_substitution_list(name, value.value)
+        elif isinstance(value, Union[ScalarValueType, Substitution, Sequence]):
+            out += _name_and_value_to_substitution_list(name, value)
+        # TODO sequence
+        elif isinstance(value, bytes):
+            out += _name_and_value_to_substitution_list(name, str(value))
+        else:
+            raise TypeError('Unexpected type for parameter value {}'.format(repr(value)))
+
+    return normalize_to_list_of_substitutions(out)
+
+
+def _parameter_description_to_substitution_list(param : ParameterDescription) -> List[Substitution]:
+    return _name_and_value_to_substitution_list(param.name, param.value)
+
+def _name_and_value_to_substitution_list(
+    name : List[Substitution],
+    value : SomeValueType
+) -> List[Substitution]:
+    out : List[SomeSubstitutionsType] = []
+
+    out.append(' -p ')
+    out += name
+    out.append(':=')
+    if isinstance(value, Union[ScalarValueType, Substitution]):
+        out += _scalar_value_to_substitution_list(value)
+    elif isinstance(value, Sequence):
+        out += _sequence_value_to_substitution_list(value)
+
+    return normalize_to_list_of_substitutions(out)
+
+def _scalar_value_to_substitution_list(value : Union[ScalarValueType, Substitution, Sequence[Union[str, Substitution]]]) -> List[Substitution]:
+    out : List[SomeSubstitutionsType] = []
+    if isinstance(value, Union[int, float, bool]):
+        out.append(str(value))
+    elif isinstance(value, Union[str, Substitution]):
+        out.append(ReplaceTextSubstitution(value, ' ', '\ '))  # escape spaces
+    return normalize_to_list_of_substitutions(out)
+
+def _sequence_value_to_substitution_list(value : Sequence) -> List[Substitution]:
+    out : List[SomeSubstitutionsType] = []
+   
+    has_types = set()
+    for subvalue in value:
+        allowed_subtypes = (float, int, str, bool) + SomeSubstitutionsType_types_tuple
+        ensure_argument_type(subvalue, allowed_subtypes, 'subvalue')
+
+        if isinstance(subvalue, Substitution):
+            has_types.add(Substitution)
+        elif isinstance(subvalue, str):
+            has_types.add(str)
+        elif isinstance(subvalue, bool):
+            has_types.add(bool)
+        elif isinstance(subvalue, int):
+            has_types.add(int)
+        elif isinstance(subvalue, float):
+            has_types.add(float)
+        elif isinstance(subvalue, Sequence):
+            has_types.add(tuple)
+        else:
+            raise RuntimeError('Failed to handle type {}'.format(repr(subvalue)))
+    
+    start_str = '['
+    end_str = ']'
+
+    if {int} == has_types:
+        # everything is an integer
+        make_mypy_happy_int = cast(List[int], value)
+        out.append(start_str)
+        for val in make_mypy_happy_int:
+            out += _scalar_value_to_substitution_list(val)
+            out.append(',')
+        out[-1] = end_str
+    elif has_types in ({float}, {int, float}):
+        # all were floats or ints, so return floats
+        make_mypy_happy_float = cast(List[Union[int, float]], value)
+        out.append(start_str)
+        for val in make_mypy_happy_float:
+            out += _scalar_value_to_substitution_list(val)
+            out.append(',')
+        out[-1] = end_str
+    elif Substitution in has_types and has_types.issubset({str, Substitution}):
+        # make a list of substitutions forming a single string
+        for val in value:
+            out += _scalar_value_to_substitution_list(val)
+    elif {bool} == has_types:
+        # all were bools
+        out.append(start_str)
+        for val in value:
+            out += _scalar_value_to_substitution_list(val)
+            out.append(',')
+        out[-1] = end_str
+    else:
+        # Should evaluate to a list of strings
+        # Normalize to a list of lists of substitutions
+        out.append(start_str)
+        for val in value:
+            out += _scalar_value_to_substitution_list(val)
+            out.append(',')
+        out[-1] = end_str
+
+    return normalize_to_list_of_substitutions(out)
+
+def _parameter_file_to_substitution_list(param_file : ParameterFile) -> List[Substitution]:
+    out : List[SomeSubstitutionsType] = []
+    out.append(' --params-file ')
+    out.append(ReplaceTextSubstitution(  # escape spaces in file path
+            param_file.param_file,
+            ' ',
+            '\ '
+        )
+    )
+    return normalize_to_list_of_substitutions(out)

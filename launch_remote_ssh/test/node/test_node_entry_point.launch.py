@@ -81,8 +81,13 @@ def generate_launch_description():
             name='param_node1',
             namespace='param_nodes',
             parameters=[
-                {'num_params': '4'},
-                {'param0': '5'},
+                {'num_params': 10},
+                {
+                    'param0': 5,
+                    'param1': 'sentence with spaces',
+                    'param2': [False, True],
+                    'param3': [4,2]
+                },
             ]
         ),
         
