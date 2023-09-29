@@ -30,17 +30,18 @@
 
 from typing import Optional
 from typing import Iterable
+from typing import Mapping
 
 from launch.some_substitutions_type import SomeSubstitutionsType
 from launch.condition import Condition
-from launch.utilities import ensure_argument_type
-from launch_ros.parameters_type import SomeParameters, ParametersDict
+from launch.utilities import ensure_argument_type, normalize_to_list_of_substitutions
+from launch_ros.parameters_type import SomeParameters
 from launch_ros.remap_rule_type import SomeRemapRules
 from launch_ros.utilities import normalize_remap_rules, normalize_parameters
 from launch_ros.parameter_descriptions import ParameterFile
 from launch_ros.parameter_descriptions import Parameter as ParameterDescription
 
-from .execute_process_remote_ssh import ExecuteProcessRemoteSSH
+from .execute_process_remote_ssh import ExecuteProcessRemoteSSH, ReplaceTextSubstitution
 
 class NodeRemoteSSH(ExecuteProcessRemoteSSH):
     def __init__(
@@ -52,7 +53,8 @@ class NodeRemoteSSH(ExecuteProcessRemoteSSH):
         # TODO(anyone) anything between these lines is not well tested
         name: Optional[SomeSubstitutionsType] = None,
         namespace: Optional[SomeSubstitutionsType] = None,
-        parameters: Optional[SomeParameters] = None,
+        parameters: Optional[SomeParameters] = None,  # If any of these are yaml files they must be
+                                                      # present on the remote system
         remappings: Optional[SomeRemapRules] = None,
         ros_arguments: Optional[Iterable[SomeSubstitutionsType]] = None,
         arguments: Optional[Iterable[SomeSubstitutionsType]] = None,
@@ -72,8 +74,6 @@ class NodeRemoteSSH(ExecuteProcessRemoteSSH):
             ensure_argument_type(parameters, (list), 'parameters', 'Node')
             normalized_params = normalize_parameters(parameters)
         self.__parameters = [] if parameters is None else normalized_params
-
-        
 
         # Build argument list
         argument_list = []
@@ -108,18 +108,51 @@ class NodeRemoteSSH(ExecuteProcessRemoteSSH):
         for parameter in self.__parameters:
             if isinstance(parameter, ParameterFile):
                 ros_argument_list.append(' --params-file ')
-                ros_argument_list.append(parameter.param_file)
-            elif isinstance(parameter, ParametersDict):
+                ros_argument_list.append(
+                    ReplaceTextSubstitution(  # escape spaces in file path
+                        parameter.param_file,
+                        ' ',
+                        '\ '
+                    )
+                )
+            elif isinstance(parameter, Mapping):
                 for param_name, param_value in parameter.items():
                     ros_argument_list.append(' -p ')
-                    ros_argument_list.append(param_name)
+                    ros_argument_list += normalize_to_list_of_substitutions(param_name)
                     ros_argument_list.append(':=')
-                    ros_argument_list.append(param_value)
+
+                    # ReplaceTextSubstitution for \n below is not the best solution.
+                    #
+                    # These values get a \n added to the end, because in
+                    # launch_ros.utilities.normalize_parameter_dict
+                    # string values in a parameter dict get passed through yaml.dump()
+                    # 
+                    # There may be some cases where getting rid of this \n
+                    # to make the command work may be a problem? With nested parameters
+                    # or something. I think this solution should work in most cases
+                    # though
+                    ros_argument_list.append(
+                        ReplaceTextSubstitution(  # escape spaces in values
+                            ReplaceTextSubstitution(  # remove \n
+                                normalize_to_list_of_substitutions(param_value),
+                                '\n',
+                                ''
+                            ),
+                            ' ',
+                            '\ '
+                        )
+                    )
             elif isinstance(parameter, ParameterDescription):
                 ros_argument_list.append(' -p ')
                 ros_argument_list.append(parameter.name)
                 ros_argument_list.append(':=')
-                ros_argument_list.append(parameter.value)
+                ros_argument_list.append(
+                    ReplaceTextSubstitution(  # escape spaces in values
+                        parameter.value,
+                        ' ',
+                        '\ '
+                    )
+                )
 
         # Generate run node command
         command = [

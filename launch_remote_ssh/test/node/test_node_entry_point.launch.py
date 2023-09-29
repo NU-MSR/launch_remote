@@ -68,7 +68,7 @@ def generate_launch_description():
             user=LaunchConfiguration('user'),
             machine=LaunchConfiguration('machine'),
             package='launch_remote_ssh',
-            executable='service_node.py',
+            executable='param_node.py',
             source_paths=[
                 PathJoinSubstitution([
                     remote_install_space,
@@ -78,6 +78,12 @@ def generate_launch_description():
                     'local_setup.bash'
                 ])
             ],
+            name='param_node1',
+            namespace='param_nodes',
+            parameters=[
+                {'num_params': '4'},
+                {'param0': '5'},
+            ]
         ),
         
         # Catch2IntegrationTestNode(
