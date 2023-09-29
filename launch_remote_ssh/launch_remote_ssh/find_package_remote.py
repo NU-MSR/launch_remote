@@ -28,20 +28,21 @@
 #
 # Author: Nick Morales
 
-from .replace_text_substitution import ReplaceTextSubstitution
-from .execute_process_remote_ssh import ExecuteProcessRemoteSSH
-from .node_remote_ssh import NodeRemoteSSH
-from .launch_remote_ssh import LaunchRemoteSSH
-from .find_package_remote import FindPackagePrefixRemote, FindPackageShareRemote
-from .install_remote_ssh import copy_single_package_install, copy_install_space
+from launch.substitutions import PathJoinSubstitution
+from launch.some_substitutions_type import SomeSubstitutionsType
 
-__all__ = [
-    'ReplaceTextSubstitution',
-    'ExecuteProcessRemoteSSH',
-    'NodeRemoteSSH',
-    'LaunchRemoteSSH',
-    'FindPackagePrefixRemote',
-    'FindPackageShareRemote',
-    'copy_install_space',
-    'copy_single_package_install',
-]
+class FindPackagePrefixRemote(PathJoinSubstitution):
+    def __init__(
+        self,
+        remote_install_space : SomeSubstitutionsType,
+        package : SomeSubstitutionsType,
+    ):
+        super().__init__([remote_install_space, package])
+
+class FindPackageShareRemote(PathJoinSubstitution):
+    def __init__(
+        self,
+        remote_install_space : SomeSubstitutionsType,
+        package : SomeSubstitutionsType,
+    ):
+        super().__init__([FindPackagePrefixRemote(remote_install_space, package), 'share', package])

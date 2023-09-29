@@ -32,7 +32,7 @@ import sys
 
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, TextSubstitution
 from launch.actions import SetLaunchConfiguration, DeclareLaunchArgument
-from launch_remote_ssh import NodeRemoteSSH, copy_single_package_install
+from launch_remote_ssh import NodeRemoteSSH, copy_single_package_install, FindPackageShareRemote
 from launch_catch_ros2 import Catch2LaunchDescription, Catch2IntegrationTestNode
 
 
@@ -117,7 +117,7 @@ def generate_launch_description():
             name='param_node1',
             namespace='param_nodes',
             parameters=[
-                {'num_params': 16},
+                {'num_params': 24},
                 {
                     'param0': False,
                     'param1': 'happy!',
@@ -136,6 +136,11 @@ def generate_launch_description():
                     'param14': [1,2,LaunchConfiguration('param14_value'),4,5,6,7,8,9],
                     'param15': [1.0,2.0,3.0,4.0,5.0,6.0,7.0,LaunchConfiguration('param15_value'),9.0],
                 },
+                PathJoinSubstitution([
+                    FindPackageShareRemote(remote_install_space, 'launch_remote_ssh'),
+                    'test',
+                    'test_node_params1.yaml'
+                ])
             ]
         ),
         

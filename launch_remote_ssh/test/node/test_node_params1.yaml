@@ -1,0 +1,10 @@
+/**:
+  ros__parameters:
+    param16: True
+    param17: 'movin and groovin'
+    param18: 89745
+    param19: -89.45
+    param20: [True, True, True, True, True, False]
+    param21: ['it', 'is', 'party', 'time']
+    param22: [123, 456, 789]
+    param23: [9.87, 6.54, 3.21]

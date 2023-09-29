@@ -72,6 +72,10 @@ if(BUILD_TESTING)
     test/node/test_node_entry_point.launch.py
     DESTINATION share/${PROJECT_NAME}/launch
   )
+  install(FILES
+    test/node/test_node_params1.yaml
+    DESTINATION share/${PROJECT_NAME}/test
+  )
   # catch_ros2 tester nodes
   add_executable(test_launch_tester_node
     test/launch/test_launch_tester_node.cpp
