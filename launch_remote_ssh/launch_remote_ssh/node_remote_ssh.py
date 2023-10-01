@@ -38,6 +38,9 @@ from typing import cast
 
 from launch.some_substitutions_type import SomeSubstitutionsType
 from launch.some_substitutions_type import SomeSubstitutionsType_types_tuple
+from launch.frontend import expose_action
+from launch.frontend import Entity
+from launch.frontend import Parser
 from launch.condition import Condition
 from launch.substitution import Substitution
 from launch.substitutions import TextSubstitution
@@ -47,7 +50,7 @@ from launch.utilities.type_utils import SomeValueType
 from launch.utilities.type_utils import ScalarValueType
 from launch_ros.parameters_type import SomeParameters
 from launch_ros.remap_rule_type import SomeRemapRules
-
+from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterFile
 from launch_ros.parameter_descriptions import Parameter as ParameterDescription
 from launch_ros.parameter_descriptions import ParameterValue as ParameterValueDescription
@@ -55,13 +58,14 @@ from launch_ros.parameter_descriptions import ParameterValue as ParameterValueDe
 from .execute_process_remote_ssh import ExecuteProcessRemoteSSH
 from .replace_text_substitution import ReplaceTextSubstitution
 
+@expose_action('node_remote_ssh')
 class NodeRemoteSSH(ExecuteProcessRemoteSSH):
     def __init__(
         self, *,
         user: SomeSubstitutionsType,
         machine: SomeSubstitutionsType,
-        package: SomeSubstitutionsType,
         executable: SomeSubstitutionsType,
+        package: Optional[SomeSubstitutionsType] = None,
         name: Optional[SomeSubstitutionsType] = None,
         namespace: Optional[SomeSubstitutionsType] = None,
         parameters: Optional[SomeParameters] = None,  # If any of these are yaml files they must be
@@ -74,7 +78,7 @@ class NodeRemoteSSH(ExecuteProcessRemoteSSH):
         source_paths: Optional[Iterable[SomeSubstitutionsType]] = None,
         condition: Optional[Condition] = None
     ):
-        self.__package = package
+        self.__package = '' if package is None else package
         self.__node_executable = executable
         self.__node_name = name
         self.__node_namespace = namespace
@@ -149,6 +153,50 @@ class NodeRemoteSSH(ExecuteProcessRemoteSSH):
             source_paths=source_paths,
             condition=condition,
         )
+
+    @classmethod
+    def parse(
+        self,
+        entity: Entity,
+        parser: Parser
+    ):
+        # Adapted from parse method here:
+        # https://github.com/ros2/launch_ros/blob/rolling/launch_ros/launch_ros/actions/node.py
+        _, kwargs = super().parse(entity, parser, ignore=['cmd'])
+        args = entity.get_attr('args', optional=True)
+        if args is not None:
+            kwargs['arguments'] = super()._parse_cmdline(args, parser)
+        ros_args = entity.get_attr('ros_args', optional=True)
+        if ros_args is not None:
+            kwargs['ros_arguments'] = super()._parse_cmdline(ros_args, parser)
+        name = entity.get_attr('name', optional=True)
+        if name is not None:
+            kwargs['name'] = parser.parse_substitution(name)
+        package = entity.get_attr('pkg', optional=True)
+        if package is not None:
+            kwargs['package'] = parser.parse_substitution(package)
+        kwargs['executable'] = parser.parse_substitution(entity.get_attr('exec'))
+        namespace = entity.get_attr('namespace', optional=True)
+        if namespace is not None:
+            kwargs['namespace'] = parser.parse_substitution(namespace)
+        remappings = entity.get_attr('remap', data_type=List[Entity], optional=True)
+        if remappings is not None:
+            kwargs['remappings'] = [
+                (
+                    parser.parse_substitution(remap.get_attr('from')),
+                    parser.parse_substitution(remap.get_attr('to'))
+                ) for remap in remappings
+            ]
+            for remap in remappings:
+                remap.assert_entity_completely_parsed()
+        parameters = entity.get_attr('param', data_type=List[Entity], optional=True)
+        if parameters is not None:
+            kwargs['parameters'] = Node().parse_nested_parameters(parameters, parser)
+
+        return self, kwargs
+
+
+
 
 def _mapping_to_substitution_list(
     mapping: Mapping,
