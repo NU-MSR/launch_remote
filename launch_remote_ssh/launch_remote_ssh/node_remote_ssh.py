@@ -52,7 +52,8 @@ from launch_ros.parameter_descriptions import ParameterFile
 from launch_ros.parameter_descriptions import Parameter as ParameterDescription
 from launch_ros.parameter_descriptions import ParameterValue as ParameterValueDescription
 
-from .execute_process_remote_ssh import ExecuteProcessRemoteSSH, ReplaceTextSubstitution
+from .execute_process_remote_ssh import ExecuteProcessRemoteSSH
+from .replace_text_substitution import ReplaceTextSubstitution
 
 class NodeRemoteSSH(ExecuteProcessRemoteSSH):
     def __init__(
