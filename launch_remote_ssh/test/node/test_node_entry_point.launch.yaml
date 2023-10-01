@@ -1,0 +1,243 @@
+# BSD 3-Clause License
+#
+# Copyright (c) 2023, Northwestern University MSR
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# * Redistributions of source code must retain the above copyright notice, this
+#   list of conditions and the following disclaimer.
+# * Redistributions in binary form must reproduce the above copyright notice,
+#   this list of conditions and the following disclaimer in the documentation
+#   and/or other materials provided with the distribution.
+# * Neither the name of the copyright holder nor the names of its
+#   contributors may be used to endorse or promote products derived from
+#   this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# Author: Nick Morales
+
+launch:
+
+- arg:
+    name: 'user'
+- arg:
+    name: 'machine'
+
+- let:
+    name: 'remote_install_space'
+    value: '/tmp/launch_remote_ssh_test/install'
+
+- copy_single_package_install:
+    user: '$(var user)'
+    machine: '$(var machine)'
+    pkg: 'launch_remote_ssh'
+    remote_install_space: '$(var remote_install_space)'
+    remove_preexisting: 'true'
+
+- let:
+    name: "num_params1"
+    value: "25"
+- let:
+    name: "param6_value"
+    value: "this is"
+- let:
+    name: "param9_value"
+    value: "is"
+- let:
+    name: "param10_name"
+    value: "param10"
+- let:
+    name: "param10_value"
+    value: "hello world"
+- let:
+    name: "param11_name"
+    value: "param11"
+- let:
+    name: "param11_value"
+    value: "true"
+- let:
+    name: "param12_name"
+    value: "param12"
+- let:
+    name: "param12_value"
+    value: "45"
+- let:
+    name: "param13_value"
+    value: "False"
+- let:
+    name: "param14_value"
+    value: "3"
+- let:
+    name: "param15_value"
+    value: "8.0"
+
+- node_remote_ssh:
+    user: "$(var user)"
+    machine: "$(var machine)"
+    pkg: "launch_remote_ssh"
+    exec: "param_node.py"
+    name: "param_node1"
+    namespace: "param_nodes"
+    source_path:
+    -
+      path: '$(find-pkg-share-remote $(var remote_install_space) launch_remote_ssh)/local_setup.bash'
+    param:
+    -
+      name: "num_params"
+      value: "$(var num_params1)"
+    -
+      name: "param0"
+      value: "False"
+    -
+      name: "param1"
+      value: "happy!"
+    -
+      name: "param2"
+      value: "-256"
+    -
+      name: "param3"
+      value: "42.42"
+    -
+      name: "param4"
+      value: "[False, True, False, True, True]"
+    -
+      name: "param5"
+      value: "['I', 'like', 'when', 'things', 'work']"
+    -
+      name: "param6"
+      value: "But $(var param6_value) a single string"
+    -
+      name: "param7"
+      value: "[9,8,7,6,5,4,3,2,1]"
+    -
+      name: "param8"
+      value: "[9.0,8.0,7.0,6.0,5.0,4.0,3.0,2.0,1.0]"
+    -
+      name: "param9"
+      value: "['This', $(var param9_value), 'not', 'a', 'single', 'string']"
+    -
+      name: "$(var param10_name)"
+      value: "$(var param10_value)"
+    -
+      name: "$(var param11_name)"
+      value: "$(var param11_value)"
+    -
+      name: "$(var param12_name)"
+      value: "$(var param12_value)"
+    -
+      name: "param13"
+      value: "[False, True, False, True, $(var param13_value)]"
+    -
+      name: "param14"
+      value: "[1,2,$(var param14_value),4,5,6,7,8,9]"
+    -
+      name: "param15"
+      value: "[1.0,2.0,3.0,4.0,5.0,6.0,7.0,$(var param15_value),9.0]"
+    -
+      from: "$(find-pkg-share-remote $(var remote_install_space) launch_remote_ssh)/test/test_node_params1.yaml"
+    -
+      from: "$(find-pkg-share-remote $(var remote_install_space) launch_remote_ssh)/test/test_node_params2.yaml"
+    -
+      name: "param24"
+      value: "1337"
+
+- let:
+    name: "num_params2"
+    value: "1"
+
+- node_remote_ssh:
+    user: "$(var user)"
+    machine: "$(var machine)"
+    pkg: "launch_remote_ssh"
+    exec: "param_node.py"
+    name: "param_node2"
+    namespace: "param_nodes"
+    args: "--ros-args -p num_params:=$(var num_params2)"
+    source_path:
+    -
+      path: '$(find-pkg-share-remote $(var remote_install_space) launch_remote_ssh)/local_setup.bash'
+    param:
+    -
+      name: "param0"
+      value: "Success"
+
+- let:
+    name: "num_services1"
+    value: "5"
+- let:
+    name: "srv1_remap"
+    value: "second_service"
+- let:
+    name: "srv2_name"
+    value: "srv2"
+- let:
+    name: "srv2_remap"
+    value: "third_service"
+- let:
+    name: "srv3_name"
+    value: "srv3"
+- let:
+    name: "srv4_remap"
+    value: "~/fifth_service"
+
+- node_remote_ssh:
+    user: "$(var user)"
+    machine: "$(var machine)"
+    pkg: "launch_remote_ssh"
+    exec: "service_node.py"
+    name: "service_node1"
+    namespace: "service_nodes"
+    ros_args: "--log-level WARN -p num_services:=$(var num_services1)"
+    source_path:
+    -
+      path: '$(find-pkg-share-remote $(var remote_install_space) launch_remote_ssh)/local_setup.bash'
+    remap:
+    -
+      from: "srv0"
+      to: "first_service"
+    -
+      from: "srv1"
+      to: "$(var srv1_remap)"
+    -
+      from: "$(var srv2_name)"
+      to: "$(var srv2_remap)"
+    -
+      from: "$(var srv3_name)"
+      to: "~/fourth_service"
+    -
+      from: "srv4"
+      to: "$(var srv4_remap)"
+
+- arg:
+    name: 'test_duration'
+    default: '10.0'
+# TODO(ngmor) Until catch_ros2 is updated with exposing these actions to frontend, this will have to just be manual
+- node:
+    pkg: launch_remote_ssh
+    exec: 'test_node_tester_node'
+    output: 'screen'
+    param:
+    -
+      name: 'test_duration'
+      value: '$(var test_duration)'
+    -
+      name: 'num_params1'
+      value: '$(var num_params1)'
+    -
+      name: 'num_params2'
+      value: '$(var num_params2)'
+    -
+      name: 'num_services1'
+      value: '$(var num_services1)'

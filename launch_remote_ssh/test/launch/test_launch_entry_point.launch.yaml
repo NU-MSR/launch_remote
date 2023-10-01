@@ -85,6 +85,9 @@ launch:
     output: 'screen'
     param:
     -
+      name: 'test_duration'
+      value: '$(var test_duration)'
+    -
       name: 'param1'
       value: '$(var param1)'
     -

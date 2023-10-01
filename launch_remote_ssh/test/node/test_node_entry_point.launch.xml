@@ -103,7 +103,7 @@ Author: Nick Morales
         <param name="param0" value="Success"/>
     </node_remote_ssh>
 
-    <let name='num_services1' value="5"/>
+    <let name="num_services1" value="5"/>
     <let name="srv1_remap" value="second_service"/>
     <let name="srv2_name" value="srv2"/>
     <let name="srv2_remap" value="third_service"/>

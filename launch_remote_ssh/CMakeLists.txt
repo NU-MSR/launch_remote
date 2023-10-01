@@ -80,6 +80,7 @@ if(BUILD_TESTING)
     test/launch/test_launch_remotely_launched.launch.yaml
     test/node/test_node_entry_point.launch.py
     test/node/test_node_entry_point.launch.xml
+    test/node/test_node_entry_point.launch.yaml
     DESTINATION share/${PROJECT_NAME}/launch
   )
   install(FILES
