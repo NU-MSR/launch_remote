@@ -28,8 +28,6 @@
 #
 # Author: Nick Morales
 
-import sys
-
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch.actions import SetLaunchConfiguration, DeclareLaunchArgument
 from launch_ros.substitutions import FindPackagePrefix
