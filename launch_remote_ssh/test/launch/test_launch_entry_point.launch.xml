@@ -3,16 +3,19 @@
     <arg name="user" />
     <arg name="machine"/>
 
-    <!-- TODO(ngmor) have to figure out how to run a command to copy over -->
-    <arg name="source_path"/>
-
-    <!-- <log message="$(command 'ros2 run launch_remote_ssh copy_install_space.py $\(user\) $\(machine\) $\(source_path\) /tmp/launch_remote_ssh_test/')"/> -->
-    <!-- <log message="$(command 'ros2 run launch_remote_ssh copy_install_space.py $(user) $(machine) $(source_path) /tmp/launch_remote_ssh_test/ ')"/> -->
-                <!-- ' USER MACHINE LOCAL_INSTALL_SPACE REMOTE_INSTALL_SPACE [options]' \')" -->
+    <let name="remote_install_space" value="/tmp/launch_remote_ssh_test/install"/>
 
     <let name="param1" value="-0.567"/>
     <let name="param2" value="this is a sentence!"/>
     <let name="param3" value="453"/>
+
+    <copy_install_space
+        user="$(var user)"
+        machine="$(var machine)"
+        local_install_space="$(find-pkg-prefix launch_remote_ssh)/../"
+        remote_install_space="$(var remote_install_space)"
+        remove_preexisting="true"
+    />
 
     <launch_remote_ssh
         user="$(var user)"
@@ -20,7 +23,7 @@
         package="launch_remote_ssh"
         file="test_launch_remotely_launched.launch.xml"
     >
-        <source_path path="$(var source_path)"/>
+        <source_path path="$(var remote_install_space)/launch_remote_ssh/share/launch_remote_ssh/local_setup.bash"/>
         <arg name="param1" value="$(var param1)"/>
         <arg name="param2" value="$(var param2)"/>
         <arg name="param3" value="$(var param3)"/>

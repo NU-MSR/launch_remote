@@ -98,11 +98,17 @@ from typing import Text
 
 from launch.some_substitutions_type import SomeSubstitutionsType
 from launch.launch_context import LaunchContext
+from launch.frontend import expose_action
+from launch.frontend import Entity
+from launch.frontend import Parser
+from launch.action import Action
 from launch.actions import LogInfo
 from launch.substitution import Substitution
+from launch.substitutions import TextSubstitution
 from launch.utilities import normalize_to_list_of_substitutions
 from launch.utilities import perform_substitutions
 
+@expose_action('copy_install_space')
 class CopyInstallSpace(LogInfo):
     def __init__(
         self, *,
@@ -124,6 +130,27 @@ class CopyInstallSpace(LogInfo):
             **kwargs
         )
 
+    @classmethod
+    def parse(
+        self,
+        entity : Entity,
+        parser : Parser
+    ):
+        _, kwargs = Action().parse(entity, parser)
+
+        kwargs['user'] = parser.parse_substitution(entity.get_attr('user'))
+        kwargs['machine'] = parser.parse_substitution(entity.get_attr('machine'))
+        kwargs['local_install_space'] = \
+            parser.parse_substitution(entity.get_attr('local_install_space'))
+        kwargs['remote_install_space'] = \
+            parser.parse_substitution(entity.get_attr('remote_install_space'))
+        remove_preexisting = entity.get_attr('remove_preexisting', optional=True)
+        if remove_preexisting is not None:
+            kwargs['remove_preexisting'] = parser.parse_substitution(remove_preexisting)
+
+        return self, kwargs
+
+
 class _CopyDir(Substitution):
     def __init__(
         self, *,
@@ -138,7 +165,9 @@ class _CopyDir(Substitution):
         self.__user = normalize_to_list_of_substitutions(user)
         self.__machine = normalize_to_list_of_substitutions(machine)
         self.__local_dir = normalize_to_list_of_substitutions(local_dir)
+        self.__local_dir.append(TextSubstitution(text='/'))
         self.__remote_dir = normalize_to_list_of_substitutions(remote_dir)
+        self.__remote_dir.append(TextSubstitution(text='/'))
         self.__remove_preexisting = normalize_to_list_of_substitutions(remove_preexisting)
 
     def describe(self) -> Text:
