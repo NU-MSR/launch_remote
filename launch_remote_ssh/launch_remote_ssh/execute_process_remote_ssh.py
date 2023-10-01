@@ -192,10 +192,7 @@ class ExecuteProcessRemoteSSH(LaunchDescription):
             kwargs['machine'] = parser.parse_substitution(entity.get_attr('machine'))
 
         if 'command' not in ignore:
-            # TODO(ngmor) parse command line input
-            # This may help
-            # https://github.com/ros2/launch/blob/rolling/launch/launch/actions/execute_process.py#L243
-            pass
+            kwargs['command'] = self._parse_cmdline(entity.get_attr('command'), parser)
 
         if 'port' not in ignore:
             port = entity.get_attr('port', optional=True)
@@ -213,3 +210,17 @@ class ExecuteProcessRemoteSSH(LaunchDescription):
                     e.assert_entity_completely_parsed()
 
         return self, kwargs
+    
+    @classmethod
+    def _parse_cmdline(
+        self,
+        cmd : Text,
+        parser : Parser
+    ) -> List[SomeSubstitutionsType]:
+        # TODO(anyone) this is not yet well tested
+
+        result = []
+        for sub in parser.parse_substitution(cmd):
+            result.append(sub)
+
+        return result
