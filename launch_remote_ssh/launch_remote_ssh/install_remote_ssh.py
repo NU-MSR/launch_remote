@@ -94,11 +94,12 @@ def _remove_dir(user, machine, remote_dir):
         shell=True
     )
 
+from typing import Text
+
 from launch.some_substitutions_type import SomeSubstitutionsType
 from launch.launch_context import LaunchContext
 from launch.actions import LogInfo
-from launch.substitutions import Command
-from launch.substitutions import TextSubstitution
+from launch.substitution import Substitution
 from launch.utilities import normalize_to_list_of_substitutions
 from launch.utilities import perform_substitutions
 
@@ -110,57 +111,64 @@ class CopyInstallSpace(LogInfo):
         local_install_space : SomeSubstitutionsType,
         remote_install_space : SomeSubstitutionsType,
         remove_preexisting : SomeSubstitutionsType = 'false',
-        on_stderr: SomeSubstitutionsType = 'fail',
         **kwargs
     ):
         super().__init__(
-            msg=_CopyInstallSpace(
+            msg=_CopyDir(
                 user=user,
                 machine=machine,
-                local_install_space=local_install_space,
-                remote_install_space=remote_install_space,
+                local_dir=local_install_space,
+                remote_dir=remote_install_space,
                 remove_preexisting=remove_preexisting,
-                on_stderr=on_stderr,
-                **kwargs
-            )
+            ),
+            **kwargs
         )
 
-class _CopyInstallSpace(Command):
+class _CopyDir(Substitution):
     def __init__(
         self, *,
         user : SomeSubstitutionsType,
         machine : SomeSubstitutionsType,
-        local_install_space : SomeSubstitutionsType,
-        remote_install_space : SomeSubstitutionsType,
+        local_dir : SomeSubstitutionsType,
+        remote_dir : SomeSubstitutionsType,
         remove_preexisting : SomeSubstitutionsType = 'false',
-        on_stderr: SomeSubstitutionsType = 'fail'
     ):
+        super().__init__()
+
         self.__user = normalize_to_list_of_substitutions(user)
         self.__machine = normalize_to_list_of_substitutions(machine)
-        self.__local_install_space = normalize_to_list_of_substitutions(local_install_space)
-        self.__remote_install_space = normalize_to_list_of_substitutions(remote_install_space)
+        self.__local_dir = normalize_to_list_of_substitutions(local_dir)
+        self.__remote_dir = normalize_to_list_of_substitutions(remote_dir)
         self.__remove_preexisting = normalize_to_list_of_substitutions(remove_preexisting)
 
-        command = ['ros2 run launch_remote_ssh copy_install_space.py ']
-        command.extend(self.__user)
-        command.append(' ')
-        command.extend(self.__machine)
-        command.append(' ')
-        command.extend(self.__local_install_space)
-        command.append(' ')
-        command.extend(self.__remote_install_space)
+    def describe(self) -> Text:
+        return f'Copy {"".join([sub.describe() for sub in self.__local_dir])}' \
+               f' to {"".join([sub.describe() for sub in self.__user])}@' \
+               f'{"".join([sub.describe() for sub in self.__machine])}:' \
+               f'{"".join([sub.describe() for sub in self.__remote_dir])}'
 
-        super().__init__(command=command, on_stderr=on_stderr)
-    
-    def perform(self, context : LaunchContext):
+    def perform(self, context : LaunchContext) -> Text:
+        user = perform_substitutions(context, self.__user)
+        machine = perform_substitutions(context, self.__machine)
+        local_dir = perform_substitutions(context, self.__local_dir)
+        remote_dir = perform_substitutions(context, self.__remote_dir)
         remove_preexisting = perform_substitutions(context, self.__remove_preexisting)
+
         if remove_preexisting == 'true':
-            self.command.extend([TextSubstitution(text=' -d ')])
+            remove_preexisting = True
         elif remove_preexisting == 'false':
-            pass
+            remove_preexisting = False
         else:
             raise Exception(
-                'Unrecognized value for remove_preexisting parameter of _CopyInstallSpace:'
+                'Unrecognized value for remove_preexisting parameter of _CopyDir:'
                 f' \'{remove_preexisting}\'. Can only be \'true\' or \'false\''
             )
-        return super().perform(context)
+
+        # Remote dir
+        if remove_preexisting:
+            _remove_dir(user, machine, remote_dir)
+
+        # Copy package to remote install directory
+        _copy_dir(user, machine, local_dir, remote_dir)
+
+        return f'Copied {local_dir} to {user}@{machine}:{remote_dir}'
