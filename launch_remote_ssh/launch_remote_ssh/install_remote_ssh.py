@@ -107,6 +107,7 @@ from launch.substitution import Substitution
 from launch.substitutions import TextSubstitution
 from launch.utilities import normalize_to_list_of_substitutions
 from launch.utilities import perform_substitutions
+from launch_ros.substitutions import FindPackagePrefix
 
 @expose_action('copy_install_space')
 class CopyInstallSpace(LogInfo):
@@ -150,6 +151,58 @@ class CopyInstallSpace(LogInfo):
 
         return self, kwargs
 
+@expose_action('copy_single_package_install')
+class CopySinglePackageInstall(LogInfo):
+    def __init__(
+        self, *,
+        user : SomeSubstitutionsType,
+        machine : SomeSubstitutionsType,
+        package : SomeSubstitutionsType,
+        remote_install_space : SomeSubstitutionsType,
+        remove_preexisting : SomeSubstitutionsType = 'false',
+        **kwargs
+    ):
+        local_package_install = normalize_to_list_of_substitutions([
+            FindPackagePrefix(package),
+            '/'
+        ])
+
+        remote_package_install = []
+        remote_package_install.extend(normalize_to_list_of_substitutions(remote_install_space))
+        remote_package_install.append(TextSubstitution(text='/'))
+        remote_package_install.extend(normalize_to_list_of_substitutions(package))
+        remote_package_install.append(TextSubstitution(text='/'))
+
+        super().__init__(
+            msg=_CopyDir(
+                user=user,
+                machine=machine,
+                local_dir=local_package_install,
+                remote_dir=remote_package_install,
+                remove_preexisting=remove_preexisting,
+            ),
+            **kwargs
+        )
+
+    @classmethod
+    def parse(
+        self,
+        entity : Entity,
+        parser : Parser
+    ):
+        _, kwargs = Action().parse(entity, parser)
+
+        kwargs['user'] = parser.parse_substitution(entity.get_attr('user'))
+        kwargs['machine'] = parser.parse_substitution(entity.get_attr('machine'))
+        kwargs['package'] = \
+            parser.parse_substitution(entity.get_attr('package'))
+        kwargs['remote_install_space'] = \
+            parser.parse_substitution(entity.get_attr('remote_install_space'))
+        remove_preexisting = entity.get_attr('remove_preexisting', optional=True)
+        if remove_preexisting is not None:
+            kwargs['remove_preexisting'] = parser.parse_substitution(remove_preexisting)
+
+        return self, kwargs
 
 class _CopyDir(Substitution):
     def __init__(

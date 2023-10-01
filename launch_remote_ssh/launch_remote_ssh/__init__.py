@@ -33,7 +33,8 @@ from .execute_process_remote_ssh import ExecuteProcessRemoteSSH
 from .node_remote_ssh import NodeRemoteSSH
 from .launch_remote_ssh import LaunchRemoteSSH
 from .find_package_remote import FindPackagePrefixRemote, FindPackageShareRemote
-from .install_remote_ssh import copy_single_package_install, copy_install_space, CopyInstallSpace
+from .install_remote_ssh import copy_install_space, copy_single_package_install, \
+    CopyInstallSpace, CopySinglePackageInstall
 
 __all__ = [
     'ReplaceTextSubstitution',
@@ -44,5 +45,6 @@ __all__ = [
     'FindPackageShareRemote',
     'copy_install_space',
     'copy_single_package_install',
-    'CopyInstallSpace'
+    'CopyInstallSpace',
+    'CopySinglePackageInstall',
 ]

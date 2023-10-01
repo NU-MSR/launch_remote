@@ -9,10 +9,10 @@
     <let name="param2" value="this is a sentence!"/>
     <let name="param3" value="453"/>
 
-    <copy_install_space
+    <copy_single_package_install
         user="$(var user)"
         machine="$(var machine)"
-        local_install_space="$(find-pkg-prefix launch_remote_ssh)/../"
+        package="launch_remote_ssh"
         remote_install_space="$(var remote_install_space)"
         remove_preexisting="true"
     />
