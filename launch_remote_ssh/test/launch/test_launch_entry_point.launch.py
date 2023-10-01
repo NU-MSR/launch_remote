@@ -33,7 +33,7 @@ import sys
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch.actions import SetLaunchConfiguration, DeclareLaunchArgument
 from launch_ros.substitutions import FindPackagePrefix
-from launch_remote_ssh import LaunchRemoteSSH, CopyInstallSpace
+from launch_remote_ssh import LaunchRemoteSSH, CopyInstallSpace, FindPackageShareRemote
 from launch_catch_ros2 import Catch2LaunchDescription, Catch2IntegrationTestNode
 
 
@@ -82,10 +82,10 @@ def generate_launch_description():
             file='test_launch_remotely_launched.launch.py',
             source_paths=[
                 PathJoinSubstitution([
-                    LaunchConfiguration('remote_install_space'),
-                    'launch_remote_ssh',
-                    'share',
-                    'launch_remote_ssh',
+                    FindPackageShareRemote(
+                        LaunchConfiguration('remote_install_space'),
+                        'launch_remote_ssh'
+                    ),
                     'local_setup.bash'
                 ])
             ],

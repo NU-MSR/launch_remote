@@ -28,21 +28,50 @@
 #
 # Author: Nick Morales
 
-from launch.substitutions import PathJoinSubstitution
-from launch.some_substitutions_type import SomeSubstitutionsType
+from typing import Sequence
 
+from launch.some_substitutions_type import SomeSubstitutionsType
+from launch.frontend import expose_substitution
+from launch.substitutions import PathJoinSubstitution
+from launch.utilities import normalize_to_list_of_substitutions
+
+@expose_substitution('find-package-prefix-remote')
 class FindPackagePrefixRemote(PathJoinSubstitution):
     def __init__(
         self,
         remote_install_space : SomeSubstitutionsType,
         package : SomeSubstitutionsType,
     ):
-        super().__init__([remote_install_space, package])
+        path = []
+        path.extend(normalize_to_list_of_substitutions(remote_install_space))
+        path.extend(normalize_to_list_of_substitutions(package))
+        super().__init__(path)
 
+    @classmethod
+    def parse(self, data : Sequence[SomeSubstitutionsType]):
+        return self, _parse_find_package_remote(data)
+
+@expose_substitution('find-package-share-remote')
 class FindPackageShareRemote(PathJoinSubstitution):
     def __init__(
         self,
         remote_install_space : SomeSubstitutionsType,
         package : SomeSubstitutionsType,
     ):
-        super().__init__([FindPackagePrefixRemote(remote_install_space, package), 'share', package])
+        path = [FindPackagePrefixRemote(remote_install_space, package), 'share']
+        path.extend(normalize_to_list_of_substitutions(package))
+        super().__init__(path)
+
+    @classmethod
+    def parse(self, data : Sequence[SomeSubstitutionsType]):
+        return self, _parse_find_package_remote(data)
+
+def _parse_find_package_remote(data : Sequence[SomeSubstitutionsType]):
+    if len(data) != 2:
+        raise ValueError('find-package-remote substitutions expect 2 arguments')
+    kwargs = {
+        'remote_install_space': data[0],
+        'package': data[1]
+    }
+
+    return kwargs

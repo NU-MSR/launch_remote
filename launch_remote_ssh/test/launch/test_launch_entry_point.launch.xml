@@ -1,5 +1,5 @@
 <launch>
-<!-- TODO(ngmor) Until catch_ros2 is updated with exposing these actions to XML, this will have to just be manual -->
+<!-- TODO(ngmor) Until catch_ros2 is updated with exposing these actions to frontend, this will have to just be manual -->
     <arg name="user" />
     <arg name="machine"/>
 
@@ -23,7 +23,7 @@
         package="launch_remote_ssh"
         file="test_launch_remotely_launched.launch.xml"
     >
-        <source_path path="$(var remote_install_space)/launch_remote_ssh/share/launch_remote_ssh/local_setup.bash"/>
+        <source_path path="$(find-package-share-remote $(var remote_install_space) launch_remote_ssh)/local_setup.bash"/>
         <arg name="param1" value="$(var param1)"/>
         <arg name="param2" value="$(var param2)"/>
         <arg name="param3" value="$(var param3)"/>
