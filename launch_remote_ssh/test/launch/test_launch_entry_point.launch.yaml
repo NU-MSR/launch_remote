@@ -1,0 +1,63 @@
+launch:
+
+- arg:
+    name: 'user'
+- arg:
+    name: 'machine'
+
+- let:
+    name: 'remote_install_space'
+    value: '/tmp/launch_remote_ssh_test/install'
+
+- copy_single_package_install:
+    user: '$(var user)'
+    machine: '$(var machine)'
+    package: 'launch_remote_ssh'
+    remote_install_space: '$(var remote_install_space)'
+    remove_preexisting: 'true'
+
+- let:
+    name: 'param1'
+    value: '-0.567'
+- let:
+    name: 'param2'
+    value: 'this is a sentence!'
+- let:
+    name: 'param3'
+    value: '453'
+
+- launch_remote_ssh:
+    user: '$(var user)'
+    machine: '$(var machine)'
+    package: 'launch_remote_ssh'
+    file: 'test_launch_remotely_launched.launch.yaml'
+    source_path:
+    -
+      path: '$(find-package-share-remote $(var remote_install_space) launch_remote_ssh)/local_setup.bash'
+    arg:
+    -
+      name: 'param1'
+      value: '$(var param1)'
+    -
+      name: 'param2'
+      value: '$(var param2)'
+    -
+      name: 'param3'
+      value: '$(var param3)'
+
+- arg:
+    name: 'test_duration'
+    default: '20.0'
+- node:
+    pkg: launch_remote_ssh
+    exec: 'test_launch_tester_node'
+    param:
+    -
+      name: 'param1'
+      value: '$(var param1)'
+    -
+      name: 'param2'
+      value: '$(var param2)'
+    -
+      name: 'param3'
+      value: '$(var param3)'

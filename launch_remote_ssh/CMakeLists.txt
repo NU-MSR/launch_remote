@@ -74,8 +74,10 @@ if(BUILD_TESTING)
   install(FILES
     test/launch/test_launch_entry_point.launch.py
     test/launch/test_launch_entry_point.launch.xml
+    test/launch/test_launch_entry_point.launch.yaml
     test/launch/test_launch_remotely_launched.launch.py
     test/launch/test_launch_remotely_launched.launch.xml
+    test/launch/test_launch_remotely_launched.launch.yaml
     test/node/test_node_entry_point.launch.py
     DESTINATION share/${PROJECT_NAME}/launch
   )

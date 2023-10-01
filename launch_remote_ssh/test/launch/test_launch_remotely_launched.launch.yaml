@@ -1,0 +1,44 @@
+launch:
+
+- arg:
+    name: 'param1'
+    default: 'parameter1value'
+- node:
+    pkg: 'launch_remote_ssh'
+    exec: 'param_node.py'
+    name: 'param1_node'
+    param:
+    -
+      name: 'num_params'
+      value: 1
+    -
+      name: 'param0'
+      value: '$(var param1)'
+- arg:
+    name: 'param2'
+    default: 'parameter2value'
+- node:
+    pkg: 'launch_remote_ssh'
+    exec: 'param_node.py'
+    name: 'param2_node'
+    param:
+    -
+      name: 'num_params'
+      value: 1
+    -
+      name: 'param0'
+      value: '$(var param2)'
+- arg:
+    name: 'param3'
+    default: 'parameter3value'
+- node:
+    pkg: 'launch_remote_ssh'
+    exec: 'param_node.py'
+    name: 'param3_node'
+    param:
+    -
+      name: 'num_params'
+      value: 1
+    -
+      name: 'param0'
+      value: '$(var param3)'
