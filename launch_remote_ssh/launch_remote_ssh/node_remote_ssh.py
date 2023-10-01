@@ -57,10 +57,10 @@ from .execute_process_remote_ssh import ExecuteProcessRemoteSSH, ReplaceTextSubs
 class NodeRemoteSSH(ExecuteProcessRemoteSSH):
     def __init__(
         self, *,
-        user : SomeSubstitutionsType,
-        machine : SomeSubstitutionsType,
-        package : SomeSubstitutionsType,
-        executable : SomeSubstitutionsType,
+        user: SomeSubstitutionsType,
+        machine: SomeSubstitutionsType,
+        package: SomeSubstitutionsType,
+        executable: SomeSubstitutionsType,
         name: Optional[SomeSubstitutionsType] = None,
         namespace: Optional[SomeSubstitutionsType] = None,
         parameters: Optional[SomeParameters] = None,  # If any of these are yaml files they must be
@@ -69,9 +69,9 @@ class NodeRemoteSSH(ExecuteProcessRemoteSSH):
         remappings: Optional[SomeRemapRules] = None,
         ros_arguments: Optional[Iterable[SomeSubstitutionsType]] = None,
         arguments: Optional[Iterable[SomeSubstitutionsType]] = None,
-        port : Optional[SomeSubstitutionsType] = None,
-        source_paths : Optional[Iterable[SomeSubstitutionsType]] = None,
-        condition : Optional[Condition] = None
+        port: Optional[SomeSubstitutionsType] = None,
+        source_paths: Optional[Iterable[SomeSubstitutionsType]] = None,
+        condition: Optional[Condition] = None
     ):
         self.__package = package
         self.__node_executable = executable
@@ -150,10 +150,10 @@ class NodeRemoteSSH(ExecuteProcessRemoteSSH):
         )
 
 def _mapping_to_substitution_list(
-    mapping : Mapping,
+    mapping: Mapping,
     _prefix: Optional[Sequence[Substitution]] = None
 ) -> List[Substitution]:
-    out : List[SomeSubstitutionsType] = []
+    out: List[SomeSubstitutionsType] = []
 
     for name, value in mapping.items():
         name = normalize_to_list_of_substitutions(name)
@@ -178,14 +178,14 @@ def _mapping_to_substitution_list(
     return normalize_to_list_of_substitutions(out)
 
 
-def _parameter_description_to_substitution_list(param : ParameterDescription) -> List[Substitution]:
+def _parameter_description_to_substitution_list(param: ParameterDescription) -> List[Substitution]:
     return _name_and_value_to_substitution_list(param.name, param.value)
 
 def _name_and_value_to_substitution_list(
-    name : List[Substitution],
-    value : SomeValueType
+    name: List[Substitution],
+    value: SomeValueType
 ) -> List[Substitution]:
-    out : List[SomeSubstitutionsType] = []
+    out: List[SomeSubstitutionsType] = []
 
     out.append(' -p ')
     out += name
@@ -197,16 +197,16 @@ def _name_and_value_to_substitution_list(
 
     return normalize_to_list_of_substitutions(out)
 
-def _scalar_value_to_substitution_list(value : Union[ScalarValueType, Substitution]) -> List[Substitution]:
-    out : List[SomeSubstitutionsType] = []
+def _scalar_value_to_substitution_list(value: Union[ScalarValueType, Substitution]) -> List[Substitution]:
+    out: List[SomeSubstitutionsType] = []
     if isinstance(value, Union[int, float, bool]):
         out.append(str(value))
     elif isinstance(value, Union[str, Substitution]):
         out.append(ReplaceTextSubstitution(value, ' ', '\ '))  # escape spaces
     return normalize_to_list_of_substitutions(out)
 
-def _sequence_value_to_substitution_list(value : Sequence) -> List[Substitution]:
-    out : List[SomeSubstitutionsType] = []
+def _sequence_value_to_substitution_list(value: Sequence) -> List[Substitution]:
+    out: List[SomeSubstitutionsType] = []
    
     has_types = set()
     for subvalue in value:
@@ -267,8 +267,8 @@ def _sequence_value_to_substitution_list(value : Sequence) -> List[Substitution]
 
     return normalize_to_list_of_substitutions(out)
 
-def _recursive_string_list_to_substitution_list(value : Sequence) -> List[Substitution]:
-    out : List[SomeSubstitutionsType] = []
+def _recursive_string_list_to_substitution_list(value: Sequence) -> List[Substitution]:
+    out: List[SomeSubstitutionsType] = []
     for val in value:
         if isinstance(val, str):
             out += _scalar_value_to_substitution_list(val)
@@ -280,8 +280,8 @@ def _recursive_string_list_to_substitution_list(value : Sequence) -> List[Substi
             out.append(',')
     return normalize_to_list_of_substitutions(out)
 
-def _parameter_file_to_substitution_list(param_file : ParameterFile) -> List[Substitution]:
-    out : List[SomeSubstitutionsType] = []
+def _parameter_file_to_substitution_list(param_file: ParameterFile) -> List[Substitution]:
+    out: List[SomeSubstitutionsType] = []
     out.append(' --params-file ')
     out.append(ReplaceTextSubstitution(  # escape spaces in file path
             param_file.param_file,

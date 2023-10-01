@@ -82,6 +82,7 @@ launch:
 - node:
     pkg: launch_remote_ssh
     exec: 'test_launch_tester_node'
+    output: 'screen'
     param:
     -
       name: 'param1'
