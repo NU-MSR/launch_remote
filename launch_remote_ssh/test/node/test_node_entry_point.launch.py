@@ -171,8 +171,16 @@ def generate_launch_description():
             ],
             name='param_node2',
             namespace='param_nodes',
-            arguments=['--ros-args', '-p', ['num_params:=', LaunchConfiguration('num_params2')]],
+            arguments=[
+                ' --ros-args ',
+                ' -p ',
+                [' num_params:=', LaunchConfiguration('num_params2')]
+            ],
             parameters=[{'param0': 'Success'}],
+        ),
+        SetLaunchConfiguration(
+            name='num_services1',
+            value='5'
         ),
         SetLaunchConfiguration(
             name='srv3_name',
@@ -181,10 +189,6 @@ def generate_launch_description():
         SetLaunchConfiguration(
             name='srv4_remap',
             value='~/fifth_service'
-        ),
-        SetLaunchConfiguration(
-            name='num_services1',
-            value='5'
         ),
         NodeRemoteSSH(
             user=LaunchConfiguration('user'),
@@ -203,10 +207,10 @@ def generate_launch_description():
             name='service_node1',
             namespace='service_nodes',
             ros_arguments=[
-                '--log-level',
-                'WARN',
-                '-p',
-                ['num_services:=',LaunchConfiguration('num_services1')],
+                ' --log-level ',
+                ' WARN ',
+                ' -p ',
+                [' num_services:=',LaunchConfiguration('num_services1')],
             ],
             remappings=[
                 ('srv0', 'first_service'),

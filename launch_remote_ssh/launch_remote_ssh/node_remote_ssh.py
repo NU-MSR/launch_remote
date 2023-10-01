@@ -72,8 +72,13 @@ class NodeRemoteSSH(ExecuteProcessRemoteSSH):
                                                       # present on the remote system, and this must
                                                       # be the path on the remote system
         remappings: Optional[SomeRemapRules] = None,
-        ros_arguments: Optional[Iterable[SomeSubstitutionsType]] = None,
-        arguments: Optional[Iterable[SomeSubstitutionsType]] = None,
+        ros_arguments: Optional[Iterable[SomeSubstitutionsType]] = None, # Slight change from
+                                                                         # typical Node() launch
+                                                                         # action, these will need
+                                                                         # to include spaces
+        arguments: Optional[Iterable[SomeSubstitutionsType]] = None, # Slight change from typical 
+                                                                     # Node() launch action, these 
+                                                                     # will need to include spaces
         port: Optional[SomeSubstitutionsType] = None,
         source_paths: Optional[Iterable[SomeSubstitutionsType]] = None,
         condition: Optional[Condition] = None
@@ -92,13 +97,11 @@ class NodeRemoteSSH(ExecuteProcessRemoteSSH):
         # Build argument list
         argument_list = []
         for argument in self.__arguments:
-            argument_list.append(' ')
             argument_list += normalize_to_list_of_substitutions(argument)
 
         # Build ros argument list
         ros_argument_list = []
         for ros_argument in self.__ros_arguments:
-            ros_argument_list.append(' ')
             ros_argument_list += normalize_to_list_of_substitutions(ros_argument)
 
         # Remap node name
@@ -140,6 +143,9 @@ class NodeRemoteSSH(ExecuteProcessRemoteSSH):
             ' ',
         ]
         command += self.__node_executable,
+        command += [
+            ' ',
+        ]
         command += argument_list
         command += [
             ' --ros-args ',
@@ -193,7 +199,8 @@ class NodeRemoteSSH(ExecuteProcessRemoteSSH):
                 remap.assert_entity_completely_parsed()
         parameters = entity.get_attr('param', data_type=List[Entity], optional=True)
         if parameters is not None:
-            kwargs['parameters'] = Node().parse_nested_parameters(parameters, parser)
+            dummy_node = Node(executable=kwargs['executable'])
+            kwargs['parameters'] = dummy_node.parse_nested_parameters(parameters, parser)
 
         return self, kwargs
 
