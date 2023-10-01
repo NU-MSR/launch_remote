@@ -33,27 +33,11 @@ import sys
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch.actions import SetLaunchConfiguration, DeclareLaunchArgument
 from launch_ros.substitutions import FindPackagePrefix
-from launch_remote_ssh import LaunchRemoteSSH, copy_single_package_install, CopyInstallSpace
+from launch_remote_ssh import LaunchRemoteSSH, CopyInstallSpace
 from launch_catch_ros2 import Catch2LaunchDescription, Catch2IntegrationTestNode
 
 
 def generate_launch_description():
-    # Manually get user and machine arguments
-    # user = ''
-    # machine = ''
-    
-    # for argv in sys.argv:
-    #     if 'user:=' in argv:
-    #         user = argv.replace('user:=', '')
-    #     elif 'machine:=' in argv:
-    #         machine = argv.replace('machine:=', '')
-
-    remote_install_space = '/tmp/launch_remote_ssh_test/install'
-
-    # # Copy files to remote install space
-    # copy_single_package_install(user, machine, 'launch_remote_ssh', remote_install_space, True)
-
-    # Run launch test
     return Catch2LaunchDescription([
         DeclareLaunchArgument(
             name='test_duration',
@@ -65,6 +49,10 @@ def generate_launch_description():
         DeclareLaunchArgument(
             name='machine',
         ),
+        SetLaunchConfiguration(
+            name='remote_install_space',
+            value='/tmp/launch_remote_ssh_test/install'
+        ),
         CopyInstallSpace(
             user=LaunchConfiguration('user'),
             machine=LaunchConfiguration('machine'),
@@ -72,7 +60,7 @@ def generate_launch_description():
                 FindPackagePrefix('launch_remote_ssh'),
                 '../'
             ]),
-            remote_install_space=remote_install_space,
+            remote_install_space=LaunchConfiguration('remote_install_space'),
             remove_preexisting='true'
         ),
         SetLaunchConfiguration(
@@ -94,7 +82,7 @@ def generate_launch_description():
             file='test_launch_remotely_launched.launch.py',
             source_paths=[
                 PathJoinSubstitution([
-                    remote_install_space,
+                    LaunchConfiguration('remote_install_space'),
                     'launch_remote_ssh',
                     'share',
                     'launch_remote_ssh',
