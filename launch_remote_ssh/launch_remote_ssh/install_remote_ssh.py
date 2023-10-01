@@ -161,6 +161,6 @@ class _CopyInstallSpace(Command):
         else:
             raise Exception(
                 'Unrecognized value for remove_preexisting parameter of _CopyInstallSpace:'
-                ' \'{remove_preexisting}\'. Can only be \'true\' or \'false\''
+                f' \'{remove_preexisting}\'. Can only be \'true\' or \'false\''
             )
         return super().perform(context)
