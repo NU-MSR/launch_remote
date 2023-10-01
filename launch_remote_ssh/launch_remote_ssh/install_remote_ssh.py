@@ -93,3 +93,74 @@ def _remove_dir(user, machine, remote_dir):
         ['ssh ' + user_machine + ' "rm -rf ' + remote_dir + '"'],
         shell=True
     )
+
+from launch.some_substitutions_type import SomeSubstitutionsType
+from launch.launch_context import LaunchContext
+from launch.actions import LogInfo
+from launch.substitutions import Command
+from launch.substitutions import TextSubstitution
+from launch.utilities import normalize_to_list_of_substitutions
+from launch.utilities import perform_substitutions
+
+class CopyInstallSpace(LogInfo):
+    def __init__(
+        self, *,
+        user : SomeSubstitutionsType,
+        machine : SomeSubstitutionsType,
+        local_install_space : SomeSubstitutionsType,
+        remote_install_space : SomeSubstitutionsType,
+        remove_preexisting : SomeSubstitutionsType = 'false',
+        on_stderr: SomeSubstitutionsType = 'fail',
+        **kwargs
+    ):
+        super().__init__(
+            msg=_CopyInstallSpace(
+                user=user,
+                machine=machine,
+                local_install_space=local_install_space,
+                remote_install_space=remote_install_space,
+                remove_preexisting=remove_preexisting,
+                on_stderr=on_stderr,
+                **kwargs
+            )
+        )
+
+class _CopyInstallSpace(Command):
+    def __init__(
+        self, *,
+        user : SomeSubstitutionsType,
+        machine : SomeSubstitutionsType,
+        local_install_space : SomeSubstitutionsType,
+        remote_install_space : SomeSubstitutionsType,
+        remove_preexisting : SomeSubstitutionsType = 'false',
+        on_stderr: SomeSubstitutionsType = 'fail'
+    ):
+        self.__user = normalize_to_list_of_substitutions(user)
+        self.__machine = normalize_to_list_of_substitutions(machine)
+        self.__local_install_space = normalize_to_list_of_substitutions(local_install_space)
+        self.__remote_install_space = normalize_to_list_of_substitutions(remote_install_space)
+        self.__remove_preexisting = normalize_to_list_of_substitutions(remove_preexisting)
+
+        command = ['ros2 run launch_remote_ssh copy_install_space.py ']
+        command.extend(self.__user)
+        command.append(' ')
+        command.extend(self.__machine)
+        command.append(' ')
+        command.extend(self.__local_install_space)
+        command.append(' ')
+        command.extend(self.__remote_install_space)
+
+        super().__init__(command=command, on_stderr=on_stderr)
+    
+    def perform(self, context : LaunchContext):
+        remove_preexisting = perform_substitutions(context, self.__remove_preexisting)
+        if remove_preexisting == 'true':
+            self.command.extend([TextSubstitution(text=' -d ')])
+        elif remove_preexisting == 'false':
+            pass
+        else:
+            raise Exception(
+                'Unrecognized value for remove_preexisting parameter of _CopyInstallSpace:'
+                ' \'{remove_preexisting}\'. Can only be \'true\' or \'false\''
+            )
+        return super().perform(context)

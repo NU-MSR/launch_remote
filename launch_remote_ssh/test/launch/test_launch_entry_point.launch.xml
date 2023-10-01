@@ -6,6 +6,10 @@
     <!-- TODO(ngmor) have to figure out how to run a command to copy over -->
     <arg name="source_path"/>
 
+    <!-- <log message="$(command 'ros2 run launch_remote_ssh copy_install_space.py $\(user\) $\(machine\) $\(source_path\) /tmp/launch_remote_ssh_test/')"/> -->
+    <!-- <log message="$(command 'ros2 run launch_remote_ssh copy_install_space.py $(user) $(machine) $(source_path) /tmp/launch_remote_ssh_test/ ')"/> -->
+                <!-- ' USER MACHINE LOCAL_INSTALL_SPACE REMOTE_INSTALL_SPACE [options]' \')" -->
+
     <let name="param1" value="-0.567"/>
     <let name="param2" value="this is a sentence!"/>
     <let name="param3" value="453"/>
