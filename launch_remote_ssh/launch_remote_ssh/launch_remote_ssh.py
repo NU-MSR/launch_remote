@@ -38,6 +38,7 @@ from launch.frontend import expose_action
 from launch.frontend import Entity
 from launch.frontend import Parser
 from launch.condition import Condition
+from launch.utilities import normalize_to_list_of_substitutions
 
 from .replace_text_substitution import ReplaceTextSubstitution
 from .execute_process_remote_ssh import ExecuteProcessRemoteSSH
@@ -57,24 +58,30 @@ class LaunchRemoteSSH(ExecuteProcessRemoteSSH):
         source_paths : Optional[Iterable[SomeSubstitutionsType]] = None,
         condition : Optional[Condition] = None
     ):
-        self.__package = package
-        self.__file = file
+        self.__package = normalize_to_list_of_substitutions(package)
+        self.__file = normalize_to_list_of_substitutions(file)
 
         # Generate run node command
-        command = [
-            'ros2 launch ',
-            self.__package,
-            ' ',
-            self.__file,
-        ]
+        command = ['ros2 launch ']
+        command += self.__package
+        command.append(' ')
+        command += self.__file
 
         if launch_arguments is not None:
             for argument in launch_arguments:
                 command += [
                     ' ',
-                    ReplaceTextSubstitution([argument[0]], ' ', '\ '), # escape spaces
+                    ReplaceTextSubstitution(  # escape spaces
+                        normalize_to_list_of_substitutions(argument[0]),
+                        ' ',
+                        '\ '
+                    ),
                     ':=',
-                    ReplaceTextSubstitution([argument[1]], ' ', '\ '), # escape spaces
+                    ReplaceTextSubstitution(  # escape spaces
+                        normalize_to_list_of_substitutions(argument[1]),
+                        ' ',
+                        '\ '
+                    ),
                 ]
 
         # ExecuteRemoteProcess

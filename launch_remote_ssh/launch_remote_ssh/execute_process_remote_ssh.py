@@ -135,11 +135,6 @@ class ExecuteProcessRemoteSSH(LaunchDescription):
             '\\"\' > $outer_stdout"',
         ]
 
-        print('---------------------------------')
-        for item in self.__full_command:
-            print(item)
-        print('---------------------------------')
-
         super().__init__(
             initial_entities = [
                 ExecuteProcess(

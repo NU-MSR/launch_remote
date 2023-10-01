@@ -1,9 +1,15 @@
 <launch>
-<!-- TODO(nmorales) Until catch_ros2 is updated with exposing these actions to XML, this will have to just be manual -->
+<!-- TODO(ngmor) Until catch_ros2 is updated with exposing these actions to XML, this will have to just be manual -->
     <arg name="user" />
     <arg name="machine"/>
+
+    <!-- TODO(ngmor) have to figure out how to run a command to copy over -->
     <arg name="source_path"/>
-    
+
+    <let name="param1" value="-0.567"/>
+    <let name="param2" value="this is a sentence!"/>
+    <let name="param3" value="453"/>
+
     <launch_remote_ssh
         user="$(var user)"
         machine="$(var machine)"
@@ -11,5 +17,8 @@
         file="test_launch_remotely_launched.launch.xml"
     >
         <source_path path="$(var source_path)"/>
+        <arg name="param1" value="$(var copy_command)"/>
+        <arg name="param2" value="$(var param2)"/>
+        <arg name="param3" value="$(var param3)"/>
     </launch_remote_ssh>
 </launch>
