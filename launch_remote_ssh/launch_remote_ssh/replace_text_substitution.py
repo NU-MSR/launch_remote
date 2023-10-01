@@ -31,31 +31,36 @@
 from typing import List
 from typing import Text
 from typing import Iterable
+from typing import Sequence
 
 from launch.some_substitutions_type import SomeSubstitutionsType
+from launch.frontend import expose_substitution
+from launch.frontend import Entity
+from launch.frontend import Parser
 from launch.substitution import Substitution
 from launch.launch_context import LaunchContext
 from launch.utilities import normalize_to_list_of_substitutions, perform_substitutions
 
+@expose_substitution('replace_text')
 class ReplaceTextSubstitution(Substitution):
-    """Substitution that replaces text1 with text2 in an input substitution."""
+    """Substitution that replaces text1 with text2 in an input string."""
     def __init__(
         self,
-        substitutions: Iterable[SomeSubstitutionsType],
+        input_string: SomeSubstitutionsType,
         text1: SomeSubstitutionsType,
         text2: SomeSubstitutionsType
     ) -> None:
         """Create a ReplaceTextSubstitution."""
         super().__init__()
 
-        self.__substitutions = normalize_to_list_of_substitutions(substitutions)
+        self.__input_string = normalize_to_list_of_substitutions(input_string)
         self.__text1 = normalize_to_list_of_substitutions(text1)
         self.__text2 = normalize_to_list_of_substitutions(text2)
 
     @property
-    def substitutions(self) -> List[Substitution]:
+    def input_string(self) -> List[Substitution]:
         """Getter for text1."""
-        return self.__substitutions
+        return self.__input_string
 
     @property
     def text1(self) -> List[Substitution]:
@@ -71,12 +76,18 @@ class ReplaceTextSubstitution(Substitution):
         """Return a description of this substitution as a string."""
         return f'Replace {"".join([sub.describe() for sub in self.text1])}' \
                f' with {"".join([sub.describe() for sub in self.text2])}' \
-               f' in {"".join([sub.describe() for sub in self.substitutions])}'
+               f' in {"".join([sub.describe() for sub in self.input_string])}'
 
     def perform(self, context: LaunchContext) -> Text:
         """Perform the substitution by returning the string itself."""
 
-        performed_substitution = perform_substitutions(context, self.substitutions)
+        performed_input_string = perform_substitutions(context, self.input_string)
         performed_text1 = perform_substitutions(context, self.text1)
         performed_text2 = perform_substitutions(context, self.text2)
-        return performed_substitution.replace(performed_text1, performed_text2)
+        return performed_input_string.replace(performed_text1, performed_text2)
+    
+    @classmethod
+    def parse(self, data: Sequence[SomeSubstitutionsType]):
+        if len(data) != 3:
+            raise ValueError('ReplaceTextSubstitution expects 3 arguments')
+        return self, {'input_string': data[0], 'text1': data[1], 'text2': data[2]}
