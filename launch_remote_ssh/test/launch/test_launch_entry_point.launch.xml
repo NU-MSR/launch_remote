@@ -1,13 +1,8 @@
 <launch>
-<!-- TODO(ngmor) Until catch_ros2 is updated with exposing these actions to frontend, this will have to just be manual -->
     <arg name="user" />
     <arg name="machine"/>
 
     <let name="remote_install_space" value="/tmp/launch_remote_ssh_test/install"/>
-
-    <let name="param1" value="-0.567"/>
-    <let name="param2" value="this is a sentence!"/>
-    <let name="param3" value="453"/>
 
     <copy_single_package_install
         user="$(var user)"
@@ -16,6 +11,10 @@
         remote_install_space="$(var remote_install_space)"
         remove_preexisting="true"
     />
+
+    <let name="param1" value="-0.567"/>
+    <let name="param2" value="this is a sentence!"/>
+    <let name="param3" value="453"/>
 
     <launch_remote_ssh
         user="$(var user)"
@@ -28,4 +27,13 @@
         <arg name="param2" value="$(var param2)"/>
         <arg name="param3" value="$(var param3)"/>
     </launch_remote_ssh>
+
+    <arg name="test_duration" default="20.0"/>
+    <!-- TODO(ngmor) Until catch_ros2 is updated with exposing these actions to frontend, this will have to just be manual -->
+    <node pkg="launch_remote_ssh" exec="test_launch_tester_node">
+        <param name="test_duration" value="$(var test_duration)"/>
+        <param name="param1" value="$(var param1)"/>
+        <param name="param2" value="$(var param2)"/>
+        <param name="param3" value="$(var param3)"/>
+    </node>
 </launch>

@@ -40,10 +40,6 @@ from launch_catch_ros2 import Catch2LaunchDescription, Catch2IntegrationTestNode
 def generate_launch_description():
     return Catch2LaunchDescription([
         DeclareLaunchArgument(
-            name='test_duration',
-            default_value='20.0',
-        ),
-        DeclareLaunchArgument(
             name='user',
         ),
         DeclareLaunchArgument(
@@ -91,6 +87,10 @@ def generate_launch_description():
                 ('param2', LaunchConfiguration('param2')),
                 ('param3', LaunchConfiguration('param3')),
             ]
+        ),
+        DeclareLaunchArgument(
+            name='test_duration',
+            default_value='20.0',
         ),
         Catch2IntegrationTestNode(
             package='launch_remote_ssh',
