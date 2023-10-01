@@ -78,8 +78,8 @@ class NodeRemoteSSH(ExecuteProcessRemoteSSH):
         source_paths: Optional[Iterable[SomeSubstitutionsType]] = None,
         condition: Optional[Condition] = None
     ):
-        self.__package = '' if package is None else package
-        self.__node_executable = executable
+        self.__package = [] if package is None else normalize_to_list_of_substitutions(package)
+        self.__node_executable = normalize_to_list_of_substitutions(executable)
         self.__node_name = name
         self.__node_namespace = namespace
         self.__arguments = [] if arguments is None else arguments
@@ -104,12 +104,12 @@ class NodeRemoteSSH(ExecuteProcessRemoteSSH):
         # Remap node name
         if self.__node_name is not None:
             ros_argument_list.append(' -r __node:=')
-            ros_argument_list.append(self.__node_name)
+            ros_argument_list += normalize_to_list_of_substitutions(self.__node_name)
 
         # Set namespace
         if self.__node_namespace is not None:
             ros_argument_list.append(' -r __ns:=/')
-            ros_argument_list.append(self.__node_namespace)
+            ros_argument_list += normalize_to_list_of_substitutions(self.__node_namespace)
 
         # Remappings
         for remapping in self.__remappings:
@@ -134,13 +134,15 @@ class NodeRemoteSSH(ExecuteProcessRemoteSSH):
         # Generate run node command
         command = [
             'ros2 run ',
-            self.__package,
-            ' ',
-            self.__node_executable,
         ]
+        command += self.__package
+        command += [
+            ' ',
+        ]
+        command += self.__node_executable,
         command += argument_list
         command += [
-            ' --ros-args '
+            ' --ros-args ',
         ]
         command += ros_argument_list
 
