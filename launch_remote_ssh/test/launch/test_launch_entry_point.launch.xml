@@ -17,7 +17,7 @@
         file="test_launch_remotely_launched.launch.xml"
     >
         <source_path path="$(var source_path)"/>
-        <arg name="param1" value="$(var copy_command)"/>
+        <arg name="param1" value="$(var param1)"/>
         <arg name="param2" value="$(var param2)"/>
         <arg name="param3" value="$(var param3)"/>
     </launch_remote_ssh>
