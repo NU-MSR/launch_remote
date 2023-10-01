@@ -191,8 +191,8 @@ class ExecuteProcessRemoteSSH(LaunchDescription):
         if 'machine' not in ignore:
             kwargs['machine'] = parser.parse_substitution(entity.get_attr('machine'))
 
-        if 'command' not in ignore:
-            kwargs['command'] = self._parse_cmdline(entity.get_attr('command'), parser)
+        if 'cmd' not in ignore:
+            kwargs['cmd'] = self._parse_cmdline(entity.get_attr('cmd'), parser)
 
         if 'port' not in ignore:
             port = entity.get_attr('port', optional=True)
