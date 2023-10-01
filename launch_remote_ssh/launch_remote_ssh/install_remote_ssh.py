@@ -195,7 +195,7 @@ class CopySinglePackageInstall(LogInfo):
         kwargs['user'] = parser.parse_substitution(entity.get_attr('user'))
         kwargs['machine'] = parser.parse_substitution(entity.get_attr('machine'))
         kwargs['package'] = \
-            parser.parse_substitution(entity.get_attr('package'))
+            parser.parse_substitution(entity.get_attr('pkg'))
         kwargs['remote_install_space'] = \
             parser.parse_substitution(entity.get_attr('remote_install_space'))
         remove_preexisting = entity.get_attr('remove_preexisting', optional=True)

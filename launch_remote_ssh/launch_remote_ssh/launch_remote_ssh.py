@@ -104,7 +104,7 @@ class LaunchRemoteSSH(ExecuteProcessRemoteSSH):
         # https://github.com/ros2/launch/blob/rolling/launch/launch/actions/include_launch_description.py
         _, kwargs = super().parse(entity, parser, ignore=['cmd'])
 
-        kwargs['package'] = parser.parse_substitution(entity.get_attr('package'))
+        kwargs['package'] = parser.parse_substitution(entity.get_attr('pkg'))
         kwargs['file'] = parser.parse_substitution(entity.get_attr('file'))
 
         args = entity.get_attr('arg', data_type=List[Entity], optional=True)

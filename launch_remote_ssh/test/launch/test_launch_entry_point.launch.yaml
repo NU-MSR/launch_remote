@@ -42,7 +42,7 @@ launch:
 - copy_single_package_install:
     user: '$(var user)'
     machine: '$(var machine)'
-    package: 'launch_remote_ssh'
+    pkg: 'launch_remote_ssh'
     remote_install_space: '$(var remote_install_space)'
     remove_preexisting: 'true'
 
@@ -59,11 +59,11 @@ launch:
 - launch_remote_ssh:
     user: '$(var user)'
     machine: '$(var machine)'
-    package: 'launch_remote_ssh'
+    pkg: 'launch_remote_ssh'
     file: 'test_launch_remotely_launched.launch.yaml'
     source_path:
     -
-      path: '$(find-package-share-remote $(var remote_install_space) launch_remote_ssh)/local_setup.bash'
+      path: '$(find-pkg-share-remote $(var remote_install_space) launch_remote_ssh)/local_setup.bash'
     arg:
     -
       name: 'param1'

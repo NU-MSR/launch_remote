@@ -39,7 +39,7 @@ Author: Nick Morales
     <copy_single_package_install
         user="$(var user)"
         machine="$(var machine)"
-        package="launch_remote_ssh"
+        pkg="launch_remote_ssh"
         remote_install_space="$(var remote_install_space)"
         remove_preexisting="true"
     />
@@ -51,10 +51,10 @@ Author: Nick Morales
     <launch_remote_ssh
         user="$(var user)"
         machine="$(var machine)"
-        package="launch_remote_ssh"
+        pkg="launch_remote_ssh"
         file="test_launch_remotely_launched.launch.xml"
     >
-        <source_path path="$(find-package-share-remote $(var remote_install_space) launch_remote_ssh)/local_setup.bash"/>
+        <source_path path="$(find-pkg-share-remote $(var remote_install_space) launch_remote_ssh)/local_setup.bash"/>
         <arg name="param1" value="$(var param1)"/>
         <arg name="param2" value="$(var param2)"/>
         <arg name="param3" value="$(var param3)"/>

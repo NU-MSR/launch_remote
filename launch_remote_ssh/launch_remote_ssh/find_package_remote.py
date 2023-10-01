@@ -35,7 +35,7 @@ from launch.frontend import expose_substitution
 from launch.substitutions import PathJoinSubstitution
 from launch.utilities import normalize_to_list_of_substitutions
 
-@expose_substitution('find-package-prefix-remote')
+@expose_substitution('find-pkg-prefix-remote')
 class FindPackagePrefixRemote(PathJoinSubstitution):
     def __init__(
         self,
@@ -51,7 +51,7 @@ class FindPackagePrefixRemote(PathJoinSubstitution):
     def parse(self, data: Sequence[SomeSubstitutionsType]):
         return self, _parse_find_package_remote(data)
 
-@expose_substitution('find-package-share-remote')
+@expose_substitution('find-pkg-share-remote')
 class FindPackageShareRemote(PathJoinSubstitution):
     def __init__(
         self,
