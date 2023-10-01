@@ -64,7 +64,7 @@ def generate_launch_description():
         ),
         DeclareLaunchArgument(
             name='param3',
-            default_value='parameter2value',
+            default_value='parameter3value',
         ),
         Node(
             package='launch_remote_ssh',

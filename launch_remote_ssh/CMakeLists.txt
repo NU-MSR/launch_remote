@@ -73,7 +73,9 @@ if(BUILD_TESTING)
   # Launch files for testing remote launch capabilities
   install(FILES
     test/launch/test_launch_entry_point.launch.py
+    test/launch/test_launch_entry_point.launch.xml
     test/launch/test_launch_remotely_launched.launch.py
+    test/launch/test_launch_remotely_launched.launch.xml
     test/node/test_node_entry_point.launch.py
     DESTINATION share/${PROJECT_NAME}/launch
   )

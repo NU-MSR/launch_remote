@@ -31,23 +31,25 @@
 from typing import Optional
 from typing import Iterable
 from typing import Tuple
+from typing import List
 
 from launch.some_substitutions_type import SomeSubstitutionsType
+from launch.frontend import expose_action
+from launch.frontend import Entity
+from launch.frontend import Parser
 from launch.condition import Condition
 
 from .replace_text_substitution import ReplaceTextSubstitution
 from .execute_process_remote_ssh import ExecuteProcessRemoteSSH
 
-
-
-
+@expose_action('launch_remote_ssh')
 class LaunchRemoteSSH(ExecuteProcessRemoteSSH):
     def __init__(
         self, *,
         user : SomeSubstitutionsType,
         machine : SomeSubstitutionsType,
         package : SomeSubstitutionsType,
-        launch_file : SomeSubstitutionsType,
+        file : SomeSubstitutionsType,
         launch_arguments: Optional[
             Iterable[Tuple[SomeSubstitutionsType, SomeSubstitutionsType]]
         ] = None,
@@ -56,14 +58,14 @@ class LaunchRemoteSSH(ExecuteProcessRemoteSSH):
         condition : Optional[Condition] = None
     ):
         self.__package = package
-        self.__launch_file = launch_file
+        self.__file = file
 
         # Generate run node command
         command = [
             'ros2 launch ',
             self.__package,
             ' ',
-            self.__launch_file,
+            self.__file,
         ]
 
         if launch_arguments is not None:
@@ -84,3 +86,30 @@ class LaunchRemoteSSH(ExecuteProcessRemoteSSH):
             source_paths=source_paths,
             condition=condition,
         )
+
+    @classmethod
+    def parse(
+        self,
+        entity : Entity,
+        parser : Parser
+    ):
+        # Adapted from parse method here:
+        # https://github.com/ros2/launch/blob/rolling/launch/launch/actions/include_launch_description.py
+        _, kwargs = super().parse(entity, parser, ignore=['command'])
+
+        kwargs['package'] = parser.parse_substitution(entity.get_attr('package'))
+        kwargs['file'] = parser.parse_substitution(entity.get_attr('file'))
+
+        args = entity.get_attr('arg', data_type=List[Entity], optional=True)
+        if args is not None:
+            kwargs['launch_arguments'] = [
+                (
+                    parser.parse_substitution(e.get_attr('name')),
+                    parser.parse_substitution(e.get_attr('value')),
+                )
+                for e in args
+            ]
+            for e in args:
+                e.assert_entity_completely_parsed()
+
+        return self, kwargs

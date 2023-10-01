@@ -1,0 +1,15 @@
+<launch>
+<!-- TODO(nmorales) Until catch_ros2 is updated with exposing these actions to XML, this will have to just be manual -->
+    <arg name="user" />
+    <arg name="machine"/>
+    <arg name="source_path"/>
+    
+    <launch_remote_ssh
+        user="$(var user)"
+        machine="$(var machine)"
+        package="launch_remote_ssh"
+        file="test_launch_remotely_launched.launch.xml"
+    >
+        <source_path path="$(var source_path)"/>
+    </launch_remote_ssh>
+</launch>

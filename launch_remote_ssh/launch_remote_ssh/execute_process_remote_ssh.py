@@ -31,11 +31,16 @@
 from typing import Optional
 from typing import Iterable
 from typing import Text
+from typing import List
 
 from uuid import uuid4
 
-from launch import LaunchDescription
 from launch.some_substitutions_type import SomeSubstitutionsType
+from launch import LaunchDescription
+from launch.frontend import expose_action
+from launch.frontend import Entity
+from launch.frontend import Parser
+from launch.action import Action
 from launch.condition import Condition
 from launch.actions import ExecuteProcess
 from launch.utilities import normalize_to_list_of_substitutions
@@ -45,6 +50,7 @@ from .replace_text_substitution import ReplaceTextSubstitution
 
 # https://answers.ros.org/question/364152/remotely-launch-nodes-in-ros2/
 
+@expose_action('execute_process_remote_ssh')
 class ExecuteProcessRemoteSSH(LaunchDescription):
     def __init__(
         self, *,
@@ -56,10 +62,10 @@ class ExecuteProcessRemoteSSH(LaunchDescription):
         condition : Optional[Condition] = None
     ):
         # Store arguments
-        self.__user = user
-        self.__machine = machine
+        self.__user = normalize_to_list_of_substitutions(user)
+        self.__machine = normalize_to_list_of_substitutions(machine)
         self.__command = command
-        self.__port = port
+        self.__port = None if port is None else normalize_to_list_of_substitutions(port)
         self.__source_paths = [] if source_paths is None else source_paths
         self.__condition = condition
         self.__uuid = uuid4()
@@ -68,13 +74,14 @@ class ExecuteProcessRemoteSSH(LaunchDescription):
         port_list = []
         if self.__port is not None:
             port_list.append(' -p ')
-            port_list.append(self.__port)
+            port_list += self.__port
 
         # Compile process name into list with shortened UUID at the end
         # TODO(anyone) - this has a max of 80 characters. Can this be enforced still using
         # substitutions?
-        process_name_list = [
-            self.__machine,
+        process_name_list = []
+        process_name_list += self.__machine
+        process_name_list += [
             '_',
             self.uuid_short
         ]
@@ -93,14 +100,14 @@ class ExecuteProcessRemoteSSH(LaunchDescription):
 
         for path in self.__source_paths:
             source_path_commands.append('source '),
-            source_path_commands.append(path),
+            source_path_commands.extend(normalize_to_list_of_substitutions(path)),
             source_path_commands.append(' && ')
 
         # Compile command into list
         command_list = []
 
         for cmd in self.__command:
-            command_list.append(cmd)
+            command_list += normalize_to_list_of_substitutions(cmd)
 
         # Build full command
         self.__full_command = [
@@ -113,9 +120,13 @@ class ExecuteProcessRemoteSSH(LaunchDescription):
         self.__full_command += port_list
         self.__full_command += [
             ' -t ',
-            self.__user,
+        ]
+        self.__full_command += self.__user
+        self.__full_command += [
             '@',
-            self.__machine,
+        ]
+        self.__full_command += self.__machine
+        self.__full_command += [
             ' \'bash -i -c \\"'
         ]
         self.__full_command += source_path_commands
@@ -123,7 +134,12 @@ class ExecuteProcessRemoteSSH(LaunchDescription):
         self.__full_command += [
             '\\"\' > $outer_stdout"',
         ]
-        
+
+        print('---------------------------------')
+        for item in self.__full_command:
+            print(item)
+        print('---------------------------------')
+
         super().__init__(
             initial_entities = [
                 ExecuteProcess(
@@ -150,8 +166,55 @@ class ExecuteProcessRemoteSSH(LaunchDescription):
     def uuid_full(self) -> Text:
         """Getter for full uuid."""
         return f'{self.__uuid.int:x}'
-    
+
     @property
     def uuid_short(self) -> Text:
         """Getter for short uuid."""
         return f'{self.uuid_full:.12}'
+
+    @classmethod
+    def parse(
+        self,
+        entity : Entity,
+        parser : Parser,
+        ignore : Optional[List[str]] = None
+    ):
+        # Adapted from parse method here:
+        # https://github.com/ros2/launch/blob/rolling/launch/launch/actions/execute_process.py
+
+        # Even though this is not derived from the Action class,
+        # we're treating it like an action, so use the Action class
+        # parsing method to get the condition kwarg
+        _, kwargs = Action().parse(entity, parser)
+
+        if ignore is None:
+            ignore = []
+
+        if 'user' not in ignore:
+            kwargs['user'] = parser.parse_substitution(entity.get_attr('user'))
+
+        if 'machine' not in ignore:
+            kwargs['machine'] = parser.parse_substitution(entity.get_attr('machine'))
+
+        if 'command' not in ignore:
+            # TODO(ngmor) parse command line input
+            # This may help
+            # https://github.com/ros2/launch/blob/rolling/launch/launch/actions/execute_process.py#L243
+            pass
+
+        if 'port' not in ignore:
+            port = entity.get_attr('port', optional=True)
+            if port is not None:
+                kwargs['port'] = parser.parse_substitution(port)
+        
+        if 'source_paths' not in ignore:
+            source_paths = entity.get_attr('source_path', data_type=List[Entity], optional=True)
+            if source_paths is not None:
+                kwargs['source_paths'] = [
+                    parser.parse_substitution(e.get_attr('path'))
+                    for e in source_paths
+                ]
+                for e in source_paths:
+                    e.assert_entity_completely_parsed()
+
+        return self, kwargs

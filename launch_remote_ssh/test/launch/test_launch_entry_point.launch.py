@@ -80,7 +80,7 @@ def generate_launch_description():
             user=LaunchConfiguration('user'),
             machine=LaunchConfiguration('machine'),
             package='launch_remote_ssh',
-            launch_file='test_launch_remotely_launched.launch.py',
+            file='test_launch_remotely_launched.launch.py',
             source_paths=[
                 PathJoinSubstitution([
                     remote_install_space,
