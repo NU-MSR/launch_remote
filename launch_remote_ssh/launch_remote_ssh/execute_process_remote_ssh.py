@@ -54,12 +54,12 @@ from .replace_text_substitution import ReplaceTextSubstitution
 class ExecuteProcessRemoteSSH(LaunchDescription):
     def __init__(
         self, *,
-        user : SomeSubstitutionsType,
-        machine : SomeSubstitutionsType,
-        command : Iterable[SomeSubstitutionsType],
-        port : Optional[SomeSubstitutionsType] = None,
-        source_paths : Optional[Iterable[SomeSubstitutionsType]] = None,
-        condition : Optional[Condition] = None
+        user: SomeSubstitutionsType,
+        machine: SomeSubstitutionsType,
+        command: Iterable[SomeSubstitutionsType],
+        port: Optional[SomeSubstitutionsType] = None,
+        source_paths: Optional[Iterable[SomeSubstitutionsType]] = None,
+        condition: Optional[Condition] = None
     ):
         # Store arguments
         self.__user = normalize_to_list_of_substitutions(user)
@@ -170,9 +170,9 @@ class ExecuteProcessRemoteSSH(LaunchDescription):
     @classmethod
     def parse(
         self,
-        entity : Entity,
-        parser : Parser,
-        ignore : Optional[List[str]] = None
+        entity: Entity,
+        parser: Parser,
+        ignore: Optional[List[str]] = None
     ):
         # Adapted from parse method here:
         # https://github.com/ros2/launch/blob/rolling/launch/launch/actions/execute_process.py
@@ -214,8 +214,8 @@ class ExecuteProcessRemoteSSH(LaunchDescription):
     @classmethod
     def _parse_cmdline(
         self,
-        cmd : Text,
-        parser : Parser
+        cmd: Text,
+        parser: Parser
     ) -> List[SomeSubstitutionsType]:
         # TODO(anyone) this is not yet well tested
 

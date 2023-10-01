@@ -47,16 +47,16 @@ from .execute_process_remote_ssh import ExecuteProcessRemoteSSH
 class LaunchRemoteSSH(ExecuteProcessRemoteSSH):
     def __init__(
         self, *,
-        user : SomeSubstitutionsType,
-        machine : SomeSubstitutionsType,
-        package : SomeSubstitutionsType,
-        file : SomeSubstitutionsType,
+        user: SomeSubstitutionsType,
+        machine: SomeSubstitutionsType,
+        package: SomeSubstitutionsType,
+        file: SomeSubstitutionsType,
         launch_arguments: Optional[
             Iterable[Tuple[SomeSubstitutionsType, SomeSubstitutionsType]]
         ] = None,
-        port : Optional[SomeSubstitutionsType] = None,
-        source_paths : Optional[Iterable[SomeSubstitutionsType]] = None,
-        condition : Optional[Condition] = None
+        port: Optional[SomeSubstitutionsType] = None,
+        source_paths: Optional[Iterable[SomeSubstitutionsType]] = None,
+        condition: Optional[Condition] = None
     ):
         self.__package = normalize_to_list_of_substitutions(package)
         self.__file = normalize_to_list_of_substitutions(file)
@@ -97,8 +97,8 @@ class LaunchRemoteSSH(ExecuteProcessRemoteSSH):
     @classmethod
     def parse(
         self,
-        entity : Entity,
-        parser : Parser
+        entity: Entity,
+        parser: Parser
     ):
         # Adapted from parse method here:
         # https://github.com/ros2/launch/blob/rolling/launch/launch/actions/include_launch_description.py

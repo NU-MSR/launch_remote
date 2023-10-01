@@ -113,11 +113,11 @@ from launch_ros.substitutions import FindPackagePrefix
 class CopyInstallSpace(LogInfo):
     def __init__(
         self, *,
-        user : SomeSubstitutionsType,
-        machine : SomeSubstitutionsType,
-        local_install_space : SomeSubstitutionsType,
-        remote_install_space : SomeSubstitutionsType,
-        remove_preexisting : SomeSubstitutionsType = 'false',
+        user: SomeSubstitutionsType,
+        machine: SomeSubstitutionsType,
+        local_install_space: SomeSubstitutionsType,
+        remote_install_space: SomeSubstitutionsType,
+        remove_preexisting: SomeSubstitutionsType = 'false',
         **kwargs
     ):
         super().__init__(
@@ -134,8 +134,8 @@ class CopyInstallSpace(LogInfo):
     @classmethod
     def parse(
         self,
-        entity : Entity,
-        parser : Parser
+        entity: Entity,
+        parser: Parser
     ):
         _, kwargs = Action().parse(entity, parser)
 
@@ -155,11 +155,11 @@ class CopyInstallSpace(LogInfo):
 class CopySinglePackageInstall(LogInfo):
     def __init__(
         self, *,
-        user : SomeSubstitutionsType,
-        machine : SomeSubstitutionsType,
-        package : SomeSubstitutionsType,
-        remote_install_space : SomeSubstitutionsType,
-        remove_preexisting : SomeSubstitutionsType = 'false',
+        user: SomeSubstitutionsType,
+        machine: SomeSubstitutionsType,
+        package: SomeSubstitutionsType,
+        remote_install_space: SomeSubstitutionsType,
+        remove_preexisting: SomeSubstitutionsType = 'false',
         **kwargs
     ):
         local_package_install = normalize_to_list_of_substitutions([
@@ -187,8 +187,8 @@ class CopySinglePackageInstall(LogInfo):
     @classmethod
     def parse(
         self,
-        entity : Entity,
-        parser : Parser
+        entity: Entity,
+        parser: Parser
     ):
         _, kwargs = Action().parse(entity, parser)
 
@@ -207,11 +207,11 @@ class CopySinglePackageInstall(LogInfo):
 class _CopyDir(Substitution):
     def __init__(
         self, *,
-        user : SomeSubstitutionsType,
-        machine : SomeSubstitutionsType,
-        local_dir : SomeSubstitutionsType,
-        remote_dir : SomeSubstitutionsType,
-        remove_preexisting : SomeSubstitutionsType = 'false',
+        user: SomeSubstitutionsType,
+        machine: SomeSubstitutionsType,
+        local_dir: SomeSubstitutionsType,
+        remote_dir: SomeSubstitutionsType,
+        remove_preexisting: SomeSubstitutionsType = 'false',
     ):
         super().__init__()
 
@@ -229,7 +229,7 @@ class _CopyDir(Substitution):
                f'{"".join([sub.describe() for sub in self.__machine])}:' \
                f'{"".join([sub.describe() for sub in self.__remote_dir])}'
 
-    def perform(self, context : LaunchContext) -> Text:
+    def perform(self, context: LaunchContext) -> Text:
         user = perform_substitutions(context, self.__user)
         machine = perform_substitutions(context, self.__machine)
         local_dir = perform_substitutions(context, self.__local_dir)
