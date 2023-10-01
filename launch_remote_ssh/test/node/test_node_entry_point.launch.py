@@ -33,37 +33,28 @@ import sys
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, TextSubstitution
 from launch.actions import SetLaunchConfiguration, DeclareLaunchArgument
 from launch_ros.parameter_descriptions import Parameter, ParameterFile
-from launch_remote_ssh import NodeRemoteSSH, copy_single_package_install, FindPackageShareRemote
+from launch_remote_ssh import NodeRemoteSSH, CopySinglePackageInstall, FindPackageShareRemote
 from launch_catch_ros2 import Catch2LaunchDescription, Catch2IntegrationTestNode
 
 
 def generate_launch_description():
-    # Manually get user and machine arguments
-    user = ''
-    machine = ''
-    
-    for argv in sys.argv:
-        if 'user:=' in argv:
-            user = argv.replace('user:=', '')
-        elif 'machine:=' in argv:
-            machine = argv.replace('machine:=', '')
-
-    remote_install_space = '/tmp/launch_remote_ssh_test/install'
-
-    # Copy files to remote install space
-    copy_single_package_install(user, machine, 'launch_remote_ssh', remote_install_space, True)
-
-    # Run launch test
     return Catch2LaunchDescription([
-        DeclareLaunchArgument(
-            name='test_duration',
-            default_value='60.0',
-        ),
         DeclareLaunchArgument(
             name='user',
         ),
         DeclareLaunchArgument(
             name='machine',
+        ),
+        SetLaunchConfiguration(
+            name='remote_install_space',
+            value='/tmp/launch_remote_ssh_test/install'
+        ),
+        CopySinglePackageInstall(
+            user=LaunchConfiguration('user'),
+            machine=LaunchConfiguration('machine'),
+            package='launch_remote_ssh',
+            remote_install_space=LaunchConfiguration('remote_install_space'),
+            remove_preexisting='true'
         ),
         SetLaunchConfiguration(
             name='num_params1',
@@ -113,8 +104,8 @@ def generate_launch_description():
             source_paths=[
                 PathJoinSubstitution([
                     FindPackageShareRemote(
-                        remote_install_space,
-                        'launch_remote_ssh',
+                        LaunchConfiguration('remote_install_space'),
+                        'launch_remote_ssh'
                     ),
                     'local_setup.bash'
                 ])
@@ -142,13 +133,19 @@ def generate_launch_description():
                     'param15': [1.0,2.0,3.0,4.0,5.0,6.0,7.0,LaunchConfiguration('param15_value'),9.0],
                 },
                 PathJoinSubstitution([
-                    FindPackageShareRemote(remote_install_space, 'launch_remote_ssh'),
+                    FindPackageShareRemote(
+                        LaunchConfiguration('remote_install_space'),
+                        'launch_remote_ssh'
+                    ),
                     'test',
                     'test_node_params1.yaml'
                 ]),
                 ParameterFile(
                     PathJoinSubstitution([
-                        FindPackageShareRemote(remote_install_space, 'launch_remote_ssh'),
+                        FindPackageShareRemote(
+                            LaunchConfiguration('remote_install_space'),
+                            'launch_remote_ssh'
+                        ),
                         'test',
                         'test_node_params2.yaml'
                     ]),
@@ -168,8 +165,8 @@ def generate_launch_description():
             source_paths=[
                 PathJoinSubstitution([
                     FindPackageShareRemote(
-                        remote_install_space,
-                        'launch_remote_ssh',
+                        LaunchConfiguration('remote_install_space'),
+                        'launch_remote_ssh'
                     ),
                     'local_setup.bash'
                 ])
@@ -199,8 +196,8 @@ def generate_launch_description():
             source_paths=[
                 PathJoinSubstitution([
                     FindPackageShareRemote(
-                        remote_install_space,
-                        'launch_remote_ssh',
+                        LaunchConfiguration('remote_install_space'),
+                        'launch_remote_ssh'
                     ),
                     'local_setup.bash'
                 ])
@@ -220,6 +217,10 @@ def generate_launch_description():
                 (LaunchConfiguration('srv3_name'), '~/fourth_service'),
                 ('srv4', LaunchConfiguration('srv4_remap'))
             ]
+        ),
+        DeclareLaunchArgument(
+            name='test_duration',
+            default_value='10.0',
         ),
         Catch2IntegrationTestNode(
             package='launch_remote_ssh',
