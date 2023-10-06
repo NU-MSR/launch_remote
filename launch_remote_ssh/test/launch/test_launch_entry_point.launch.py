@@ -28,10 +28,10 @@
 #
 # Author: Nick Morales
 
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
-from launch.actions import SetLaunchConfiguration, DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, Command
+from launch.actions import SetLaunchConfiguration, DeclareLaunchArgument, LogInfo
 from launch_ros.substitutions import FindPackagePrefix
-from launch_remote_ssh import LaunchRemoteSSH, CopySinglePackageInstall, FindPackageShareRemote
+from launch_remote_ssh import LaunchRemoteSSH, FindPackageShareRemote
 from launch_catch_ros2 import Catch2LaunchDescription, Catch2IntegrationTestNode
 
 
@@ -47,12 +47,27 @@ def generate_launch_description():
             name='remote_install_space',
             value='/tmp/launch_remote_ssh_test/install'
         ),
-        CopySinglePackageInstall(
-            user=LaunchConfiguration('user'),
-            machine=LaunchConfiguration('machine'),
-            package='launch_remote_ssh',
-            remote_install_space=LaunchConfiguration('remote_install_space'),
-            remove_preexisting='true'
+        # Typically, copying of the install space should not be performed in a launch file.
+        # Best practice would be to copy the install space during the build process, for example with a
+        # colcon extension.
+
+        # This copy command workaround is only here to simplify running this test.
+        SetLaunchConfiguration(
+            name='copy_command',
+            value=[
+                'ros2 run launch_remote_ssh copy_install_space.py ',
+                LaunchConfiguration('user'),
+                ' ',
+                LaunchConfiguration('machine'),
+                ' ',
+                FindPackagePrefix('launch_remote_ssh'),
+                '/ ',
+                LaunchConfiguration('remote_install_space'),
+                '/launch_remote_ssh/ -d'
+            ]
+        ),
+        LogInfo(
+            msg=Command(command=LaunchConfiguration('copy_command'))
         ),
         SetLaunchConfiguration(
             name='param1',

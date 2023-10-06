@@ -36,13 +36,15 @@ Author: Nick Morales
 
     <let name="remote_install_space" value="/tmp/launch_remote_ssh_test/install"/>
 
-    <copy_single_package_install
-        user="$(var user)"
-        machine="$(var machine)"
-        pkg="launch_remote_ssh"
-        remote_install_space="$(var remote_install_space)"
-        remove_preexisting="true"
-    />
+    <!--
+    Typically, copying of the install space should not be performed in a launch file.
+    Best practice would be to copy the install space during the build process, for example with a
+    colcon extension.
+
+    This copy command workaround is only here to simplify running this test.
+    -->
+    <let name="copy_command" value="ros2 run launch_remote_ssh copy_install_space.py $(var user) $(var machine) $(find-pkg-prefix launch_remote_ssh)/ $(var remote_install_space)/launch_remote_ssh/ -d"/>
+    <log message="$(command $(var copy_command))" />
 
     <let name="num_params1" value="25"/>
     <let name="param6_value" value="this is"/>
