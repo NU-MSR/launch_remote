@@ -44,6 +44,7 @@ def generate_flexible_launch_xml(package_name, in_file_path, out_file_path):
     user_arg_specified = False
 
     # Process arguments in input launch file
+    flexible_launch_root.append(ET.Comment('User-defined custom launch arguments'))
     for arg in launch_file_root.findall('arg'):
         assert 'name' in arg.attrib
         name = arg.attrib['name']
@@ -70,6 +71,9 @@ def generate_flexible_launch_xml(package_name, in_file_path, out_file_path):
         launch_local_tag.append(arg_subtag)
 
     # Add user and machine args and logic to handle them
+    flexible_launch_root.append(
+        ET.Comment('Boilerplate arguments and logic for handling user/machine arguments')
+    )
     if not user_arg_specified:  # if custom user arg is not specified, append default
         user_arg = create_arg_tag('user', 'USER_NOT_SPECIFIED')
         flexible_launch_root.append(user_arg)
@@ -98,7 +102,13 @@ def generate_flexible_launch_xml(package_name, in_file_path, out_file_path):
     flexible_launch_root.append(user_not_specified_shutdown)
 
     # Append remote and local launch tags
+    flexible_launch_root.append(
+        ET.Comment('Remote launch action (runs if \'machine\' argument is not \'localhost\')')
+    )
     flexible_launch_root.append(launch_remote_ssh_tag)
+    flexible_launch_root.append(
+        ET.Comment('Local launch action (runs if \'machine\' argument is \'localhost\')')
+    )
     flexible_launch_root.append(launch_local_tag)
 
     # Read/create output paths
