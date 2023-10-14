@@ -126,6 +126,12 @@ if(BUILD_TESTING)
     test/flexible_launch_xmls/test_generate_flexible3.core.launch
     test/flexible_launch_xmls/test_generate_flexible4.core.launch.xml
   )
+
+  # TODO(ngmor) remove
+  install(FILES
+    test/flexible_launch_xmls/test_generate_flexible3.core.launch
+    DESTINATION share/${PROJECT_NAME}/launch
+  )
 endif()
 
 ament_export_dependencies(
