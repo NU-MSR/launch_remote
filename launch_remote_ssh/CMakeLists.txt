@@ -112,10 +112,28 @@ if(BUILD_TESTING)
     test_node_tester_node
     DESTINATION lib/${PROJECT_NAME}
   )
+
+  # Set directories and include CMake function for use in tests
+  set(launch_remote_ssh_DIR ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/cmake)
+  include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_flexible_launch_xmls.cmake)
+
+  generate_flexible_launch_xmls(
+    DESTINATION share/${PROJECT_NAME}/launch
+    PACKAGE ${PROJECT_NAME}
+    DIRECTORIES
+    test/flexible_launch_xmls/to_generate
+    FILES
+    test/flexible_launch_xmls/test_generate_flexible3.core.launch
+    test/flexible_launch_xmls/test_generate_flexible4.core.launch.xml
+  )
 endif()
 
 ament_export_dependencies(
   rclcpp
 )
 
-ament_package()
+# Custom cmake
+ament_package(CONFIG_EXTRAS
+  cmake/generate_flexible_launch_xmls.cmake
+)
+install(DIRECTORY cmake DESTINATION share/${PROJECT_NAME})
