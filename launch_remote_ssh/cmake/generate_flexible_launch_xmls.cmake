@@ -61,30 +61,43 @@ function(generate_flexible_launch_xmls)
   # TODO - make sure to install the core launch files
 
   find_package(PythonInterp REQUIRED)
+
+  # Compile arguments for script
+  set(FILES_ARG " -f ")
+  foreach(FILE ${ARG_FILES})
+    set(FILES_ARG "${FILES_ARG} ${FILE}")
+  endforeach()
+  set(DIRS_ARG " -d ")
+  foreach(DIR ${ARG_DIRECTORIES})
+    set(DIRS_ARG "${DIRS_ARG} ${DIR}")
+  endforeach()
   
-  set(GENERATE_FLEXIBLE_LAUNCH_XMLS_ERROR_FILE 
+  set(ERROR_FILE 
     ${CMAKE_CURRENT_BINARY_DIR}/generate_flexible_launch_xmls_error.log
   )
 
+  # Run the script to generate the flexible launch files at install time
   install(CODE "
     # Run processing/install script
     execute_process(
-      COMMAND ${PYTHON_EXECUTABLE} ${launch_remote_ssh_DIR}/../scripts/generate_flexible_launch_xmls.py
-      RESULT_VARIABLE GENERATE_FLEXIBLE_LAUNCH_XMLS_RESULT
-      ERROR_FILE ${GENERATE_FLEXIBLE_LAUNCH_XMLS_ERROR_FILE}
+      COMMAND
+        ${PYTHON_EXECUTABLE}
+        ${launch_remote_ssh_DIR}/../scripts/generate_flexible_launch_xmls.py
+        ${ARG_PACKAGE}
+        ${CMAKE_INSTALL_PREFIX}/${ARG_DESTINATION}
+        ${FILES_ARG}
+        ${DIRS_ARG}
+      RESULT_VARIABLE SCRIPT_RESULT
+      ERROR_FILE ${ERROR_FILE}
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     )
 
     # Read errors from error file if script did not complete successfully
-    if (NOT GENERATE_FLEXIBLE_LAUNCH_XMLS_RESULT EQUAL 0)
-      if(EXISTS ${GENERATE_FLEXIBLE_LAUNCH_XMLS_ERROR_FILE})
-        file(READ
-          ${GENERATE_FLEXIBLE_LAUNCH_XMLS_ERROR_FILE}
-          GENERATE_FLEXIBLE_LAUNCH_XMLS_ERROR_MSG
-        )
+    if (NOT SCRIPT_RESULT EQUAL 0)
+      if(EXISTS ${ERROR_FILE})
+        file(READ ${ERROR_FILE} ERROR_MSG)
       endif()
-      message(FATAL_ERROR
-        \"Generating flexible launch files failed.\n\${GENERATE_FLEXIBLE_LAUNCH_XMLS_ERROR_MSG}\"
-      )
+      message(FATAL_ERROR \"Generating flexible launch files failed.\n\${ERROR_MSG}\")
     endif()
   ")
 
