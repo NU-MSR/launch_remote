@@ -34,7 +34,6 @@ from .node_remote_ssh import NodeRemoteSSH
 from .launch_remote_ssh import LaunchRemoteSSH
 from .find_package_remote import FindPackagePrefixRemote, FindPackageShareRemote
 from .install_remote_ssh import copy_install_space, copy_single_package_install
-from .generate_flexible_launch_xml import generate_flexible_launch_xml
 
 __all__ = [
     'ReplaceTextSubstitution',
@@ -45,5 +44,4 @@ __all__ = [
     'FindPackageShareRemote',
     'copy_install_space',
     'copy_single_package_install',
-    'generate_flexible_launch_xml',
 ]

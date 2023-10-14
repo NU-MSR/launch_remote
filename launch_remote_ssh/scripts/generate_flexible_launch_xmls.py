@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 from typing import Optional
 
-import xml.etree.ElementTree as ET
 import argparse
 import os
+import xml.etree.ElementTree as ET
 
 def create_arg_tag(name: str, default: Optional[str]=None):
     out = ET.Element('arg')
@@ -115,23 +115,65 @@ def generate_flexible_launch_xml(package_name, in_file_path, out_file_path):
     with open(out_path, 'w') as out_file:
         flexible_launch_file.write(out_path)
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-        description='Automatically generate a remote XML launch file from an XML launch file'
-    )
-    parser.add_argument(
-        'package_name',
-        help='Package name of launch files'
-    )
-    parser.add_argument(
-        'in_file',
-        help='Path to input XML launch file to convert to a remote launch file',
-    )
-    parser.add_argument(
-        'out_file',
-        help='Path to output XML remote launch file'
-    )
+parser = argparse.ArgumentParser(
+    description='Automatically generate flexible XML launch files from a series of core XML launch files'
+)
 
-    args = parser.parse_args()
+parser.add_argument(
+    'package_name',
+    help='Package name of launch files'
+)
 
-    generate_flexible_launch_xml(args.package_name, args.in_file, args.out_file, )
+parser.add_argument(
+    'out_dir',
+    help='Directory to output XML remote launch files'
+)
+parser.add_argument(
+    '-f', '--files',
+    help='Input files: path to input core XML launch files to convert to flexible launch files',
+    nargs='*'
+)
+
+parser.add_argument(
+    '-d', '--dirs',
+    help='Input Directories: path to directory that contains core XML launch files'
+         ' to convert to flexible launch files',
+    nargs='*'
+)
+
+args = parser.parse_args()
+
+# Collect files
+file_paths = []
+if args.files is not None:
+    for file in args.files:
+        file_paths.append(os.path.abspath(file))
+
+if args.dirs is not None:
+    for dir in args.dirs:
+        dir_path = os.path.abspath(dir)
+        for item in os.listdir(dir_path):
+            if 'core' in item:
+                file_paths.append(dir_path + '/' + item)
+
+if len(file_paths) == 0:
+    parser.print_help()
+    raise Exception('No files provided to convert.')
+
+for in_file_path in file_paths:
+    in_file_name = os.path.basename(in_file_path)
+
+    in_file_name_components = in_file_name.split('.')
+
+    if 'core' not in in_file_name_components:
+        raise Exception(f'Input file {in_file_name} is not marked as a core launch file '
+                        '(with \'.core.\' in the file name).')
+
+    out_file_name_components = in_file_name_components.copy()
+    out_file_name_components.pop(out_file_name_components.index('core'))
+
+    out_file_name = '.'.join(out_file_name_components)
+
+    out_file_path = os.path.abspath(args.out_dir + '/' + out_file_name)
+
+    generate_flexible_launch_xml(args.package_name, in_file_path, out_file_path)

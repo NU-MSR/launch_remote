@@ -40,12 +40,18 @@ ament_python_install_package(launch_remote_ssh
   SETUP_CFG setup.cfg
 )
 
-# Copy utility scripts
+# Copy utility ROS executables
 install(PROGRAMS
-  scripts/copy_install_space.py
-  scripts/stop_all_remote_processes
+  src/copy_install_space.py
+  src/stop_all_remote_processes
   DESTINATION lib/${PROJECT_NAME}
 )
+
+# Copy utility scripts
+install(DIRECTORY scripts DESTINATION share/${PROJECT_NAME})
+
+# Install custom cmake
+install(DIRECTORY cmake DESTINATION share/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   # TODO(anyone) lint testing
@@ -138,8 +144,6 @@ ament_export_dependencies(
   rclcpp
 )
 
-# Custom cmake
 ament_package(CONFIG_EXTRAS
   cmake/generate_flexible_launch_xmls.cmake
 )
-install(DIRECTORY cmake DESTINATION share/${PROJECT_NAME})
