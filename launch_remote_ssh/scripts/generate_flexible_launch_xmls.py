@@ -3,6 +3,7 @@ from typing import Optional
 
 import argparse
 import os
+import shutil
 import xml.etree.ElementTree as ET
 
 def create_arg_tag(name: str, default: Optional[str]=None):
@@ -56,7 +57,7 @@ def generate_flexible_launch_xml(package_name, in_file_path, out_file_path):
             machine_arg_specified = True
         elif 'remote_source_path' in name:
             source_path_tag = ET.SubElement(launch_remote_ssh_tag, 'source_path')
-            source_path_tag.attrib['path'] = f'$(var {name}'
+            source_path_tag.attrib['path'] = f'$(var {name})'
 
         # Create an argument subtag for local and remote launch tags
         arg_subtag = create_let_tag(name, f'$(var {name})')
@@ -176,4 +177,9 @@ for in_file_path in file_paths:
 
     out_file_path = os.path.abspath(args.out_dir + '/' + out_file_name)
 
+    # Generate and install flexible launch xml
     generate_flexible_launch_xml(args.package_name, in_file_path, out_file_path)
+
+    # Install core launch xml
+    out_core_file_path = os.path.abspath(args.out_dir + '/' + in_file_name)
+    shutil.copy2(in_file_path, out_core_file_path)

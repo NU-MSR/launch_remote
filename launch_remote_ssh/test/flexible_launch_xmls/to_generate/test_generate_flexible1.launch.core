@@ -1,0 +1,8 @@
+<launch>
+    <node pkg="launch_remote_ssh" exec="param_node.py"/>
+    <!--
+    Typically this would be an actually path,
+    because find-pkg-prefix wouldn't work if the package isn't already sourced
+    -->
+    <arg name="remote_source_path" default="$(find-pkg-share launch_remote_ssh)/local_setup.bash"/>
+</launch>

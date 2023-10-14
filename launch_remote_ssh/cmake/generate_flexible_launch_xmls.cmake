@@ -58,8 +58,6 @@ function(generate_flexible_launch_xmls)
     )
   endif()
 
-  # TODO - make sure to install the core launch files
-
   find_package(PythonInterp REQUIRED)
 
   # Compile arguments for script

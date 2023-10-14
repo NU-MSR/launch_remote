@@ -129,14 +129,8 @@ if(BUILD_TESTING)
     DIRECTORIES
     test/flexible_launch_xmls/to_generate
     FILES
-    test/flexible_launch_xmls/test_generate_flexible3.core.launch
-    test/flexible_launch_xmls/test_generate_flexible4.core.launch.xml
-  )
-
-  # TODO(ngmor) remove
-  install(FILES
-    test/flexible_launch_xmls/test_generate_flexible3.core.launch
-    DESTINATION share/${PROJECT_NAME}/launch
+    test/flexible_launch_xmls/test_generate_flexible3.launch.core
+    test/flexible_launch_xmls/test_generate_flexible4.launch.core.xml
   )
 endif()
 
