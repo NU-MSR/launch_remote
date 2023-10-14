@@ -58,33 +58,34 @@ function(generate_flexible_launch_xmls)
     )
   endif()
 
-  # TODO(ngmor) documentation - make sure to install the core launch files
+  # TODO - make sure to install the core launch files
 
-  if(NOT ${PythonInterp_FOUND})
-    find_package(PythonInterp REQUIRED)
-  endif()
-
-  # https://stackoverflow.com/questions/20792802/why-variables-are-not-accessed-inside-script-in-cmake
-
-  install(
-    CODE
-    "
-      execute_process(
-        COMMAND
-          ${CMAKE_COMMAND}
-          -DSCRIPT_PATH=${launch_remote_ssh_DIR}/../scripts/generate_flexible_launch_xmls.py
-          -DERROR_FILE=${CMAKE_CURRENT_BINARY_DIR}/generate_flexible_launch_xmls_error.log
-          \"-DDIRECTORIES=${ARG_DIRECTORIES}\"
-          \"-DFILES=${ARG_FILES}\"
-          -P ${launch_remote_ssh_DIR}/generate_flexible_launch_xmls_run_script.cmake 
-        RESULT_VARIABLE GENERATE_FLEXIBLE_LAUNCH_XMLS_RESULT
-        WORKING_DIRECTORY
-        ${CMAKE_CURRENT_SOURCE_DIR}
-      )
-      if(NOT GENERATE_FLEXIBLE_LAUNCH_XMLS_RESULT EQUAL 0)
-        message(FATAL_ERROR \"Generating flexible launch files failed.\")
-      endif()
-    "
+  find_package(PythonInterp REQUIRED)
+  
+  set(GENERATE_FLEXIBLE_LAUNCH_XMLS_ERROR_FILE 
+    ${CMAKE_CURRENT_BINARY_DIR}/generate_flexible_launch_xmls_error.log
   )
+
+  install(CODE "
+    # Run processing/install script
+    execute_process(
+      COMMAND ${PYTHON_EXECUTABLE} ${launch_remote_ssh_DIR}/../scripts/generate_flexible_launch_xmls.py
+      RESULT_VARIABLE GENERATE_FLEXIBLE_LAUNCH_XMLS_RESULT
+      ERROR_FILE ${GENERATE_FLEXIBLE_LAUNCH_XMLS_ERROR_FILE}
+    )
+
+    # Read errors from error file if script did not complete successfully
+    if (NOT GENERATE_FLEXIBLE_LAUNCH_XMLS_RESULT EQUAL 0)
+      if(EXISTS ${GENERATE_FLEXIBLE_LAUNCH_XMLS_ERROR_FILE})
+        file(READ
+          ${GENERATE_FLEXIBLE_LAUNCH_XMLS_ERROR_FILE}
+          GENERATE_FLEXIBLE_LAUNCH_XMLS_ERROR_MSG
+        )
+      endif()
+      message(FATAL_ERROR
+        \"Generating flexible launch files failed.\n\${GENERATE_FLEXIBLE_LAUNCH_XMLS_ERROR_MSG}\"
+      )
+    endif()
+  ")
 
 endfunction()
