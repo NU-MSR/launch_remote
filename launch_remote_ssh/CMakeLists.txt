@@ -123,7 +123,7 @@ if(BUILD_TESTING)
   set(launch_remote_ssh_DIR ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/cmake)
   include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_flexible_launch_xmls.cmake)
 
-  generate_flexible_launch_xmls(
+  launch_remote_ssh_generate_flexible_launch_xmls(
     DESTINATION share/${PROJECT_NAME}/launch
     PACKAGE ${PROJECT_NAME}
     DIRECTORIES

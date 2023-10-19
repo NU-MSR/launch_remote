@@ -30,7 +30,7 @@
 
 # TODO(ngmor) document
 
-function(generate_flexible_launch_xmls)
+function(launch_remote_ssh_generate_flexible_launch_xmls)
   cmake_parse_arguments(ARG
     ""
     "DESTINATION;PACKAGE"
