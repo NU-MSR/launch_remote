@@ -28,6 +28,8 @@
 #
 # Author: Nick Morales
 
+from typing import List
+
 from launch.action import Action
 
 from launch.frontend import expose_action
@@ -41,9 +43,15 @@ class FlexibleFrontendLaunchDefaults(Action):
     launch_remote_ssh_generate_flexible_launch_xmls cmake function
     to specify default arguments for required remote launch items.
     """
-    def __init__():
+    def __init__(self):
         super().__init__()
 
     @classmethod
     def parse(self, entity: Entity, parser: Parser):
+        # Have to visit nested tags or an "Unexpected nested tag(s)" error
+        # will be raised at launch
+
+        user = entity.get_attr('user', data_type=List[Entity], optional=True)
+        source_paths = entity.get_attr('source_path', data_type=List[Entity], optional=True)
+
         return self, {}
