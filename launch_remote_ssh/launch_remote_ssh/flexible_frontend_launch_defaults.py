@@ -34,8 +34,8 @@ from launch.frontend import expose_action
 from launch.frontend import Entity
 from launch.frontend import Parser
 
-@expose_action('flexible_frontend_defaults')
-class FlexibleFrontendDefaults(Action):
+@expose_action('flexible_frontend_launch_defaults')
+class FlexibleFrontendLaunchDefaults(Action):
     """
     This action does nothing, and is only used in concert with the
     launch_remote_ssh_generate_flexible_launch_xmls cmake function
