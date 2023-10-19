@@ -28,22 +28,22 @@
 #
 # Author: Nick Morales
 
-from .replace_text_substitution import ReplaceTextSubstitution
-from .execute_process_remote_ssh import ExecuteProcessRemoteSSH
-from .node_remote_ssh import NodeRemoteSSH
-from .launch_remote_ssh import LaunchRemoteSSH
-from .flexible_frontend_defaults import FlexibleFrontendDefaults
-from .find_package_remote import FindPackagePrefixRemote, FindPackageShareRemote
-from .install_remote_ssh import copy_install_space, copy_single_package_install
+from launch.action import Action
 
-__all__ = [
-    'ReplaceTextSubstitution',
-    'ExecuteProcessRemoteSSH',
-    'NodeRemoteSSH',
-    'LaunchRemoteSSH',
-    'FlexibleFrontendDefaults',
-    'FindPackagePrefixRemote',
-    'FindPackageShareRemote',
-    'copy_install_space',
-    'copy_single_package_install',
-]
+from launch.frontend import expose_action
+from launch.frontend import Entity
+from launch.frontend import Parser
+
+@expose_action('flexible_frontend_defaults')
+class FlexibleFrontendDefaults(Action):
+    """
+    This action does nothing, and is only used in concert with the
+    launch_remote_ssh_generate_flexible_launch_xmls cmake function
+    to specify default arguments for required remote launch items.
+    """
+    def __init__():
+        super().__init__()
+
+    @classmethod
+    def parse(self, entity: Entity, parser: Parser):
+        return self, {}
