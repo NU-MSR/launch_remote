@@ -32,7 +32,7 @@ from .replace_text_substitution import ReplaceTextSubstitution
 from .execute_process_remote_ssh import ExecuteProcessRemoteSSH
 from .node_remote_ssh import NodeRemoteSSH
 from .launch_remote_ssh import LaunchRemoteSSH
-from .flexible_frontend_defaults import FlexibleFrontendLaunchDefaults
+from .flexible_frontend_launch_defaults import FlexibleFrontendLaunchDefaults
 from .find_package_remote import FindPackagePrefixRemote, FindPackageShareRemote
 from .install_remote_ssh import copy_install_space, copy_single_package_install
 

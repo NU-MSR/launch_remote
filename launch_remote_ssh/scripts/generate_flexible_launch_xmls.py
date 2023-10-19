@@ -20,6 +20,8 @@ def create_let_tag(name: str, value: str):
     return out
 
 def generate_flexible_launch_xml(package_name, in_file_path, out_file_path):
+    ARG_NAMESPACE = 'flexible_launch'
+
     launch_file_name = os.path.basename(in_file_path)
     launch_file = ET.parse(in_file_path)
     launch_file_root = launch_file.getroot()
@@ -28,20 +30,18 @@ def generate_flexible_launch_xml(package_name, in_file_path, out_file_path):
 
     # Create launch_remote_ssh tag
     launch_remote_ssh_tag = ET.Element('launch_remote_ssh')
-    launch_remote_ssh_tag.attrib['user'] = '$(var user)'
-    launch_remote_ssh_tag.attrib['machine'] = '$(var machine)'
+    launch_remote_ssh_tag.attrib['user'] = f'$(var {ARG_NAMESPACE}.user)'
+    launch_remote_ssh_tag.attrib['machine'] = f'$(var {ARG_NAMESPACE}.machine)'
     launch_remote_ssh_tag.attrib['pkg'] = package_name
     launch_remote_ssh_tag.attrib['file'] = launch_file_name
     launch_remote_ssh_tag.attrib['if'] = \
-        '$(and $(not $(var run_local)) $(not $(var user_not_specified_condition)))'
+        f'$(and $(not $(var {ARG_NAMESPACE}.run_local))' \
+        f' $(not $(var {ARG_NAMESPACE}.user_not_specified_condition)))'
 
     # Create launch_local (include) tag
     launch_local_tag = ET.Element('include')
     launch_local_tag.attrib['file'] = f'$(find-pkg-share {package_name})/launch/{launch_file_name}'
-    launch_local_tag.attrib['if'] = '$(var run_local)'
-
-    machine_arg_specified = False
-    user_arg_specified = False
+    launch_local_tag.attrib['if'] = f'$(var {ARG_NAMESPACE}.run_local)'
 
     # Process arguments in input launch file
     flexible_launch_root.append(ET.Comment('User-defined custom launch arguments'))
@@ -52,15 +52,7 @@ def generate_flexible_launch_xml(package_name, in_file_path, out_file_path):
         # Add to flexible launch file
         flexible_launch_root.append(arg)
 
-        if name == 'user':
-            user_arg_specified = True
-        elif name == 'machine':
-            machine_arg_specified = True
-        elif 'remote_source_path' in name:
-            source_path_tag = ET.SubElement(launch_remote_ssh_tag, 'source_path')
-            source_path_tag.attrib['path'] = f'$(var {name})'
-
-        # Create an argument subtag for local and remote launch tags
+        # Create an argument subtag for local and flexible launch tags
         arg_subtag = create_let_tag(name, f'$(var {name})')
         arg_subtag.tag = 'arg'
 
@@ -70,45 +62,73 @@ def generate_flexible_launch_xml(package_name, in_file_path, out_file_path):
         # Pass through to launch_local tag
         launch_local_tag.append(arg_subtag)
 
+    defaults = launch_file_root.findall('flexible_frontend_launch_defaults')
+    USER_DEFAULT = 'USER_NOT_SPECIFIED'
+    user_default = USER_DEFAULT
+    source_path_defaults = []
+    if len(defaults) > 1:
+        raise Exception(
+            f'flexible_frontend_launch_defaults tag found {len(defaults)} times, only 1 expected.'
+        )
+    elif len(defaults) == 1:
+        for default in defaults[0]:
+            assert 'default' in default.attrib
+            if default.tag == 'user':
+                # Error if multiple user defaults are found
+                if user_default != USER_DEFAULT:
+                    raise Exception(
+                        'Multiple \'user\' tags found in flexible_frontend_launch_defaults tag,'
+                        ' only 1 expected'
+                    )
+                user_default = default.attrib['default']
+            elif default.tag == 'source_path':
+                source_path_defaults.append(default)
+
     # Add user and machine args and logic to handle them
     flexible_launch_root.append(
         ET.Comment('Boilerplate arguments and logic for handling user/machine arguments')
     )
-    if not user_arg_specified:  # if custom user arg is not specified, append default
-        user_arg = create_arg_tag('user', 'USER_NOT_SPECIFIED')
-        flexible_launch_root.append(user_arg)
-    if not machine_arg_specified:  # if custom machine arg is not specified, append default
-        machine_arg = create_arg_tag('machine', 'localhost')
-        flexible_launch_root.append(machine_arg)
-    run_local_arg = create_let_tag('run_local', '$(equals $(var machine) localhost)')
-    flexible_launch_root.append(run_local_arg)
-    user_not_specified_msg = create_let_tag(
-        'user_not_specified_msg',
-        "If 'machine' argument is not 'localhost', a user must be provided"
-    )
-    flexible_launch_root.append(user_not_specified_msg)
-    user_not_specified_condition = create_let_tag(
-        'user_not_specified_condition',
-        '$(and $(not $(var run_local)) $(equals $(var user) USER_NOT_SPECIFIED))'
-    )
-    flexible_launch_root.append(user_not_specified_condition)
+    flexible_launch_root.append(create_arg_tag(f'{ARG_NAMESPACE}.user', user_default))
+    flexible_launch_root.append(create_arg_tag(f'{ARG_NAMESPACE}.machine', 'localhost'))
+    flexible_launch_root.append(create_let_tag(
+        f'{ARG_NAMESPACE}.run_local',
+        f'$(equals $(var {ARG_NAMESPACE}.machine) localhost)'
+    ))
+    flexible_launch_root.append(create_let_tag(
+        f'{ARG_NAMESPACE}.user_not_specified_msg',
+        f'If \'{ARG_NAMESPACE}.machine\' argument is not \'localhost\','
+        f' \'{ARG_NAMESPACE}.user\' must be provided'
+    ))
+    flexible_launch_root.append(create_let_tag(
+        f'{ARG_NAMESPACE}.user_not_specified_condition',
+        f'$(and $(not $(var {ARG_NAMESPACE}.run_local)) '
+        f'$(equals $(var {ARG_NAMESPACE}.user) {USER_DEFAULT}))'
+    ))
     user_not_specified_log = ET.Element('log')
-    user_not_specified_log.attrib['message'] = '$(var user_not_specified_msg)'
-    user_not_specified_log.attrib['if'] = '$(var user_not_specified_condition)'
+    user_not_specified_log.attrib['message'] = f'$(var {ARG_NAMESPACE}.user_not_specified_msg)'
+    user_not_specified_log.attrib['if'] = f'$(var {ARG_NAMESPACE}.user_not_specified_condition)'
     flexible_launch_root.append(user_not_specified_log)
     user_not_specified_shutdown = ET.Element('shutdown')
-    user_not_specified_shutdown.attrib['reason'] = '$(var user_not_specified_msg)'
-    user_not_specified_shutdown.attrib['if'] = '$(var user_not_specified_condition)'
+    user_not_specified_shutdown.attrib['reason'] = f'$(var {ARG_NAMESPACE}.user_not_specified_msg)'
+    user_not_specified_shutdown.attrib['if'] = \
+        f'$(var {ARG_NAMESPACE}.user_not_specified_condition)'
     flexible_launch_root.append(user_not_specified_shutdown)
 
+    # Add source path arguments
+    for i, source_path in enumerate(source_path_defaults):
+        name = f'{ARG_NAMESPACE}.source_path{i}'
+        flexible_launch_root.append(create_arg_tag(name, source_path.attrib['default']))
+        source_path_tag = ET.SubElement(launch_remote_ssh_tag, 'source_path')
+        source_path_tag.attrib['path'] = f'$(var {name})'
+
     # Append remote and local launch tags
-    flexible_launch_root.append(
-        ET.Comment('Remote launch action (runs if \'machine\' argument is not \'localhost\')')
-    )
+    flexible_launch_root.append(ET.Comment(
+        f'Remote launch action (runs if \'{ARG_NAMESPACE}.machine\' argument is not \'localhost\')'
+    ))
     flexible_launch_root.append(launch_remote_ssh_tag)
-    flexible_launch_root.append(
-        ET.Comment('Local launch action (runs if \'machine\' argument is \'localhost\')')
-    )
+    flexible_launch_root.append(ET.Comment(
+        f'Local launch action (runs if \'{ARG_NAMESPACE}.machine\' argument is \'localhost\')'
+    ))
     flexible_launch_root.append(launch_local_tag)
 
     # Read/create output paths

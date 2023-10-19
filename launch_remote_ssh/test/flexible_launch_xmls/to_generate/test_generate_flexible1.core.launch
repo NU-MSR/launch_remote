@@ -4,5 +4,8 @@
     Typically this would be an actually path,
     because find-pkg-prefix wouldn't work if the package isn't already sourced
     -->
-    <arg name="remote_source_path" default="$(find-pkg-share launch_remote_ssh)/local_setup.bash"/>
+    <flexible_frontend_launch_defaults>
+        <user default="default_user_name"/>
+        <source_path default="$(find-pkg-share launch_remote_ssh)/local_setup.bash"/>
+    </flexible_frontend_launch_defaults>
 </launch>
