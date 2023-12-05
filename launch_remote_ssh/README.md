@@ -132,8 +132,6 @@ Some substitutions are provided for utility.
 - [FindPackageShareRemote](launch_remote_ssh/find_package_remote.py) (find-pkg-share-remote) - doesn't actually find the remote package, since all substitutions occur on the local system before any SSH happens at all. Instead, it's just a nice path join substitution between the source path and the package share.
 - [ReplaceTextSubstitution](launch_remote_ssh/replace_text_substitution.py) (replace-text)- replaces text1 with text2 in an input string. Used internally in this package but also exposed.
 
-### Flexible Launch Files
-
 ### Utilities
 #### Copying Install Space
 The `launch_remote_ssh` module provides [utilities](launch_remote_ssh/install_remote_ssh.py) for copying the install space to another machine. The `copy_install_space.py` script is provided for this. To get usage info, run:
@@ -143,6 +141,80 @@ ros2 run launch_remote_ssh copy_install_space.py --help
 ```
 
 **Note**: It's generally discouraged to run this script in a launch file, because it's a good way to create a system that works well during development, but not deployment. Ignore the fact that I have done this in the tests for this repository...
+
+### Flexible Launch Files
+"Flexible launch files" allow a user to generate launch files that can switch between launching locally and remotely simply by passing in different launch arguments. They can be very helpful for a launch file that might need to run in either context.
+
+At this time, flexible launch files are only supported for XML launch files.
+
+#### Core Launch File
+The first step to setting up flexible launch files is to define a "core" XML launch file. This is just like any other launch file, and defines what the flexible launch file will launch.
+
+The only difference is that the name of the launch file should contain `.core.`, for example:
+```
+example.core.launch
+example.core.launch.xml
+example.launch.core.xml
+```
+
+#### CMake Setup
+To generate flexible launch files, two things should be included in the `CMakeLists.txt`:
+
+1. Install the core launch files like normal:
+```
+# Typical CMake for installing a directory of launch files
+install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
+```
+
+2. Call the generation function:
+```
+launch_remote_ssh_generate_flexible_launch_xmls(
+  DESTINATION share/${PROJECT_NAME}/launch
+  PACKAGE ${PROJECT_NAME}
+  DIRECTORIES
+  launch
+)
+```
+or
+```
+launch_remote_ssh_generate_flexible_launch_xmls(
+  DESTINATION share/${PROJECT_NAME}/launch
+  PACKAGE ${PROJECT_NAME}
+  FILES
+  launch/example.core.launch.xml
+  launch/example.core.launch
+)
+```
+
+See the [CMake source](cmake/generate_flexible_launch_xmls.cmake) for more documentation.
+
+Now whenever the ROS package is built, flexible launch XMLs will be generated!
+
+#### Using Flexible Launch Files
+The generated flexible launch files will have the same file name as the core launch file, without the `.core.` (ex: `example.core.launch` -> `example.launch`).
+
+These can be launched like any other launch file, and the arguments from the core launch file are still valid. By default, the flexible launch files will run on the local machine. However, launch arguments can be specified to determine where they run:
+- `flexible_launch.user` - sets the user for the SSH command
+- `flexible_launch.machine` - sets the machine for the ssh command.
+
+So to run a launch file remotely with `my_user@my_machine`, use:
+```
+ros2 launch my_package example.launch flexible_launch.user:=my_user flexible_launch.machine:=my_machine
+```
+
+#### Flexible Launch Defaults
+Defaults can be specified in the core launch file as well. By including the following tag, a default user and source path can be specified:
+```
+<flexible_frontend_launch_defaults>
+    <user default="default_user_name"/>
+    <source_path default="default_source_path"/>
+</flexible_frontend_launch_defaults>
+```
+
+An arbitrary number of source path defaults can be provided, and these will be added as launch arguments that can be overriden as well.
+
+#### Notes
+It is recommended that when including other flexible launch files in a core launch file, always include the core versions of other launch files. This prevents bugs with propagation of the `flexible_launch` launch arguments.
 
 ## Reference
 The original screen workaround that this package was based on is proposed [here](https://answers.ros.org/question/364152/remotely-launch-nodes-in-ros2/). This package builds around and improves on that workaround.
