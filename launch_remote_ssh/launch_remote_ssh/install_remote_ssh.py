@@ -28,8 +28,6 @@
 #
 # Author: Nick Morales
 
-# TODO(ngmor) documentation
-
 from ament_index_python.packages import get_package_prefix
 import subprocess
 

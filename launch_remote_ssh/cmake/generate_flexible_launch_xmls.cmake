@@ -27,15 +27,27 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 # Author: Nick Morales
-
-# TODO(ngmor) document
+#
+# Generate flexible launch XMLs from core launch XMLs individually or in a directory.
+#
+# :param DESTINATION: destination to which generated flexible launch XMLs will be installed
+# :type DESTINATION: string
+# :param PACKAGE: the name of the package to which the launch XMLs belong
+# :type PACKAGE: string
+# :param FILES: list of core launch files from which flexible launch XMLs will be generated.
+#   if no FILES are provided, DIRECTORIES must have at least one value.
+# :type FILES: list of strings
+# :param DIRECTORIES: list of directories to search in for core launch files to convert to
+#   flexible launch files.
+#   if no DIRECTORIES are provided, FILES must have at least one value.
+# :type DIRECTORIES: list of strings
 
 function(launch_remote_ssh_generate_flexible_launch_xmls)
   cmake_parse_arguments(ARG
     ""
     "DESTINATION;PACKAGE"
     "FILES;DIRECTORIES"
-  ${ARGN}
+    ${ARGN}
   )
   if(ARG_UNPARSED_ARGUMENTS)
     message(FATAL_ERROR
