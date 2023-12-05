@@ -142,6 +142,12 @@ ros2 run launch_remote_ssh copy_install_space.py --help
 
 **Note**: It's generally discouraged to run this script in a launch file, because it's a good way to create a system that works well during development, but not deployment. Ignore the fact that I have done this in the tests for this repository...
 
+#### Stop all remote processes
+In the case where an exception is caught in launch (like by a malformed launch file) hanging screen sessions may exist. To clean these up, use:
+```
+ros2 run launch_remote_ssh stop_all_remote_processes
+```
+
 ### Flexible Launch Files
 "Flexible launch files" allow a user to generate launch files that can switch between launching locally and remotely simply by passing in different launch arguments. They can be very helpful for a launch file that might need to run in either context.
 
