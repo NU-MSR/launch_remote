@@ -1,11 +1,12 @@
 <launch>
-    <node pkg="launch_remote_ssh" exec="param_node.py"/>
-    <!--
-    Typically this would be an actually path,
-    because find-pkg-prefix wouldn't work if the package isn't already sourced
-    -->
+    <node pkg="launch_remote_ssh" exec="param_node.py" name="param_node1"/>
+    <!-- TODO(anyone) make these tests useful -->
     <flexible_frontend_launch_defaults>
         <user default="default_user_name"/>
+        <!--
+        Typically this would be an actual path,
+        because find-pkg-prefix wouldn't work if the package isn't already sourced
+        -->
         <source_path default="$(find-pkg-share launch_remote_ssh)/local_setup.bash"/>
     </flexible_frontend_launch_defaults>
 </launch>
