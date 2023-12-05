@@ -41,7 +41,7 @@ from launch.substitution import Substitution
 from launch.launch_context import LaunchContext
 from launch.utilities import normalize_to_list_of_substitutions, perform_substitutions
 
-@expose_substitution('replace_text')
+@expose_substitution('replace-text')
 class ReplaceTextSubstitution(Substitution):
     """Substitution that replaces text1 with text2 in an input string."""
     def __init__(
