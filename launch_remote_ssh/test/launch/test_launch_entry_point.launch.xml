@@ -31,6 +31,8 @@ Author: Nick Morales
 -->
 
 <launch>
+    <catch2_launch_file/>
+
     <arg name="user" />
     <arg name="machine"/>
 
@@ -63,11 +65,14 @@ Author: Nick Morales
     </launch_remote_ssh>
 
     <arg name="test_duration" default="20.0"/>
-    <!-- TODO(ngmor) Until catch_ros2 is updated with exposing these actions to frontend, this will have to just be manual -->
-    <node pkg="launch_remote_ssh" exec="test_launch_tester_node" output="screen">
+
+    <catch2_integration_test_node
+        pkg='launch_remote_ssh'
+        exec='test_launch_tester_node'
+    >
         <param name="test_duration" value="$(var test_duration)"/>
         <param name="param1" value="$(var param1)"/>
         <param name="param2" value="$(var param2)"/>
         <param name="param3" value="$(var param3)"/>
-    </node>
+    </catch2_integration_test_node>
 </launch>

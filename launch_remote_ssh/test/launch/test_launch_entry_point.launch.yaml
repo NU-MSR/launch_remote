@@ -29,6 +29,8 @@
 # Author: Nick Morales
 
 launch:
+- catch2_launch_file:
+    description: ''
 
 - arg:
     name: 'user'
@@ -82,11 +84,10 @@ launch:
 - arg:
     name: 'test_duration'
     default: '20.0'
-# TODO(ngmor) Until catch_ros2 is updated with exposing these actions to frontend, this will have to just be manual
-- node:
-    pkg: launch_remote_ssh
+
+- catch2_integration_test_node:
+    pkg: 'launch_remote_ssh'
     exec: 'test_launch_tester_node'
-    output: 'screen'
     param:
     -
       name: 'test_duration'
