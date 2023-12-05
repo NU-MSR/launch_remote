@@ -80,11 +80,69 @@ If included in launch files of their respective types, these actions will launch
 See the `test_launch_entry_point.launch.${format}` files in the [launch test directory](test/launch/) for more examples.
 
 #### Running Nodes Remotely
+Running individual nodes remotely is less well tested, but the capability is still available.
+
+Python:
+```
+NodeRemoteSSH(
+    user='my_user',
+    machine='my_machine',
+    package='my_package',
+    executable='my_node',
+    source_paths=[
+        '/example/path/to/workspace/install/setup.bash',
+    ],
+),
+```
+
+XML:
+```
+<node_remote_ssh
+    user="my_user"
+    machine="my_machine"
+    pkg="my_package"
+    exec="my_node"
+>
+    <source_path path="/example/path/to/workspace/install/setup.bash"/>
+</node_remote_ssh>
+```
+
+YAML:
+```
+- node_remote_ssh:
+    user: "my_user"
+    machine: "my_machine"
+    pkg: "my_package"
+    exec: "my_node"
+    source_path:
+    -
+      path: '/example/path/to/workspace/install/setup.bash'
+```
+
+If included in launch files of their respective types, these actions will run the `my_node` node from the `my_package` package by SSH'ing with `my_user@my_machine`. The workspace will be sourced with `source /example/path/to/workspace/install/setup.bash`. Other arguments like parameters, remaps, etc should be supported.
+
+See the `test_node_entry_point.launch.${format}` files in the [node test directory](test/node/) for more examples.
+
 #### Other Processes
+The [`LaunchRemoteSSH`](launch_remote_ssh/launch_remote_ssh.py) and [`NodeRemoteSSH`](launch_remote_ssh/node_remote_ssh.py) actions use [`ExecuteProcessRemoteSSH`](launch_remote_ssh/execute_process_remote_ssh.py) under the hood. Theoretically this could be used to launch any remote process, but it's only really been tested with the launch and node actions.
+
+#### Substitutions
+Some substitutions are provided for utility.
+- [FindPackagePrefixRemote](launch_remote_ssh/find_package_remote.py) (find-pkg-prefix-remote) - doesn't actually find the remote package, since all substitutions occur on the local system before any SSH happens at all. Instead, it's just a nice path join substitution between the source path and the package prefix.
+- [FindPackageShareRemote](launch_remote_ssh/find_package_remote.py) (find-pkg-share-remote) - doesn't actually find the remote package, since all substitutions occur on the local system before any SSH happens at all. Instead, it's just a nice path join substitution between the source path and the package share.
+- [ReplaceTextSubstitution](launch_remote_ssh/replace_text_substitution.py) (replace-text)- replaces text1 with text2 in an input string. Used internally in this package but also exposed.
 
 ### Flexible Launch Files
 
 ### Utilities
+#### Copying Install Space
+The `launch_remote_ssh` module provides [utilities](launch_remote_ssh/install_remote_ssh.py) for copying the install space to another machine. The `copy_install_space.py` script is provided for this. To get usage info, run:
+
+```
+ros2 run launch_remote_ssh copy_install_space.py --help
+```
+
+**Note**: It's generally discouraged to run this script in a launch file, because it's a good way to create a system that works well during development, but not deployment. Ignore the fact that I have done this in the tests for this repository...
 
 ## Reference
 The original screen workaround that this package was based on is proposed [here](https://answers.ros.org/question/364152/remotely-launch-nodes-in-ros2/). This package builds around and improves on that workaround.
