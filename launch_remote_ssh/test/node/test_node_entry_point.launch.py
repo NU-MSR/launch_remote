@@ -28,8 +28,9 @@
 #
 # Author: Nick Morales
 
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, TextSubstitution
-from launch.actions import SetLaunchConfiguration, DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, TextSubstitution, \
+    Command
+from launch.actions import SetLaunchConfiguration, DeclareLaunchArgument, LogInfo
 from launch_ros.parameter_descriptions import Parameter, ParameterFile
 from launch_ros.substitutions import FindPackagePrefix
 from launch_remote_ssh import NodeRemoteSSH, FindPackageShareRemote
@@ -66,6 +67,9 @@ def generate_launch_description():
                 LaunchConfiguration('remote_install_space'),
                 '/launch_remote_ssh/ -d'
             ]
+        ),
+        LogInfo(
+            msg=Command(command=LaunchConfiguration('copy_command'))
         ),
         SetLaunchConfiguration(
             name='num_params1',
