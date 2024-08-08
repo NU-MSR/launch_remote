@@ -149,7 +149,7 @@ class ExecuteProcessRemoteSSH(LaunchDescription):
                     package='launch_remote_ssh',
                     executable='remote_process_handler',
                     name='remote_process_handler_' + self.uuid_short,
-                    namespace=ReplaceTextSubstitution(self.__machine, '.', '_'),
+                    namespace=['machine_',ReplaceTextSubstitution(ReplaceTextSubstitution(self.__machine, '.', '_'),'-','_')],
                     output='screen',
                     parameters=[{'screen_process_name': process_name_list}],
                     condition=self.__condition,
