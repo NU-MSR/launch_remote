@@ -70,7 +70,7 @@ function(launch_remote_ssh_generate_flexible_launch_xmls)
     )
   endif()
 
-  find_package(PythonInterp REQUIRED)
+  find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
   # Compile arguments for script
   set(FILES_ARG " -f ")
@@ -91,7 +91,7 @@ function(launch_remote_ssh_generate_flexible_launch_xmls)
     # Run processing/install script
     execute_process(
       COMMAND
-        ${PYTHON_EXECUTABLE}
+        ${Python3_EXECUTABLE}
         ${launch_remote_ssh_DIR}/../scripts/generate_flexible_launch_xmls.py
         ${ARG_PACKAGE}
         ${CMAKE_INSTALL_PREFIX}/${ARG_DESTINATION}

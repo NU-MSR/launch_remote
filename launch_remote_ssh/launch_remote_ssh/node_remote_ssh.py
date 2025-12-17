@@ -260,7 +260,7 @@ def _scalar_value_to_substitution_list(value: Union[ScalarValueType, Substitutio
     if isinstance(value, Union[int, float, bool]):
         out.append(str(value))
     elif isinstance(value, Union[str, Substitution]):
-        out.append(ReplaceTextSubstitution(value, ' ', '\ '))  # escape spaces
+        out.append(ReplaceTextSubstitution(value, ' ', '\\ '))  # escape spaces
     return normalize_to_list_of_substitutions(out)
 
 def _sequence_value_to_substitution_list(value: Sequence) -> List[Substitution]:
@@ -344,7 +344,7 @@ def _parameter_file_to_substitution_list(param_file: ParameterFile) -> List[Subs
     out.append(ReplaceTextSubstitution(  # escape spaces in file path
             param_file.param_file,
             ' ',
-            '\ '
+            '\\ '
         )
     )
     return normalize_to_list_of_substitutions(out)

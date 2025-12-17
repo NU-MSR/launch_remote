@@ -74,13 +74,13 @@ class LaunchRemoteSSH(ExecuteProcessRemoteSSH):
                     ReplaceTextSubstitution(  # escape spaces
                         normalize_to_list_of_substitutions(argument[0]),
                         ' ',
-                        '\ '
+                        '\\ '
                     ),
                     ':=',
                     ReplaceTextSubstitution(  # escape spaces
                         normalize_to_list_of_substitutions(argument[1]),
                         ' ',
-                        '\ '
+                        '\\ '
                     ),
                 ]
 

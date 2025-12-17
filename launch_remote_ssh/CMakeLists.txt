@@ -20,8 +20,8 @@ find_package(rclcpp REQUIRED)
 add_executable(remote_process_handler
   src/remote_process_handler.cpp
 )
-ament_target_dependencies(remote_process_handler
-  rclcpp
+target_link_libraries(remote_process_handler
+  rclcpp::rclcpp
 )
 
 #############
@@ -108,10 +108,8 @@ if(BUILD_TESTING)
   add_executable(test_node_tester_node
     test/node/test_node_tester_node.cpp
   )
-  ament_target_dependencies(test_node_tester_node
-    std_srvs
-  )
   target_link_libraries(test_node_tester_node
+    ${std_srvs_TARGETS}
     catch_ros2::catch_ros2_with_node_main
   )
   install(TARGETS
